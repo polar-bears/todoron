@@ -23,6 +23,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       boardId: '',
       groupId: '',
       content: 'Asset support for functional components',
+      contentHtml: '',
       finished: false,
       finishedAt: '',
       createdAt: '',
