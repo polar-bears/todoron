@@ -6,7 +6,7 @@ export type IconSize = 'small' | 'medium' | 'large'
 const sizes = {
   small: '16px',
   medium: '18px',
-  large: '22px'
+  large: '22px',
 }
 
 export interface IIconProps {

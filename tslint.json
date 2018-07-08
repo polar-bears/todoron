@@ -1,5 +1,5 @@
 {
-  "defaultSeverity": "error",
+  "defaultSeverity": "warning",
   "extends": [
     "tslint-react",
     "tslint-eslint-rules"
@@ -56,7 +56,7 @@
     "semicolon": [true, "never"],
     "space-before-function-paren": [true],
     "switch-default": true,
-    "trailing-comma": [false],
+    "trailing-comma": [true, {"multiline": "always"}],
     "triple-equals": [ true, "allow-null-check" ],
     "typedef": [true, "parameter", "property-declaration"],
     "typedef-whitespace": [true, {"call-signature": "nospace", "index-signature": "nospace", "parameter": "nospace", "property-declaration": "nospace", "variable-declaration": "nospace"}],

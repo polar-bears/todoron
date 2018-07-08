@@ -11,7 +11,7 @@ import App from './App'
 const render  = (Component: React.ComponentClass) => {
   ReactDOM.render(
     <Component/>,
-    document.getElementById('root')
+    document.getElementById('root'),
   )
 }
 
