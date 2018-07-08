@@ -2,6 +2,7 @@ import * as React from 'react'
 import styled from '../styles/theme'
 
 export interface ITopBarProps {
+  className?: string
   header?: React.ReactNode
   footer?: React.ReactNode
 }
@@ -10,16 +11,11 @@ export interface ITopBarState {}
 
 export default class TopBar extends React.Component<ITopBarProps, ITopBarState> {
 
-  public constructor (props: ITopBarProps) {
-    super(props)
-    this.state = {}
-  }
-
   public render () {
-    const { header, footer, children } = this.props
+    const { className, header, footer, children } = this.props
 
     return (
-      <Wrapper>
+      <Wrapper className={className}>
         <Header>{header}</Header>
         <Container>{children}</Container>
         <Footer>{footer}</Footer>
@@ -40,14 +36,14 @@ const Wrapper = styled.div(({ theme }) => ({
   height: '60px',
   width: '100%',
   background: theme.bgLighter,
-  boxShadow: theme.boxShadow
+  boxShadow: theme.boxShadow,
 }))
 
 const Header = styled.div()
 
 const Container = styled.div(() => ({
   flex: '1',
-  textAlign: 'center'
+  textAlign: 'center',
 }))
 
 const Footer = styled.div()

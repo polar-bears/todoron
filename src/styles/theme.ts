@@ -12,7 +12,7 @@ const colors = {
   blue: '#2189F1',
   red: '#FF5050',
   green: '#82C788',
-  yellow: '#F29B25'
+  yellow: '#F29B25',
 }
 
 export const lightTheme = {
@@ -26,8 +26,11 @@ export const lightTheme = {
   fg: colors.gray6,
   fgDark: colors.black,
   boxShadow: '0 1px 4px rgba(0, 0, 0, 0.15)',
+  boxShadowLight: '0 2px 4px rgba(0, 0, 0, 0.08)',
   borderRadius: '2px',
-  border: `1px solid ${colors.gray3}`
+  border: `1px solid ${colors.gray3}`,
+  borderDark: `1.5px solid ${colors.gray5}`,
+  borderDarker: `1.5px solid ${colors.gray6}`,
 }
 
 const styled = _styled as CreateStyled<typeof lightTheme> 

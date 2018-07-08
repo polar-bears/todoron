@@ -1,22 +1,19 @@
 import * as React from 'react'
 import styled from '../styles/theme'
 
-export interface ILogoProps {}
+export interface ILogoProps {
+  className?: string
+}
 
 export interface ILogoState {}
 
 export default class Logo extends React.Component<ILogoProps, ILogoState> {
 
-  public constructor (props: ILogoProps) {
-    super(props)
-    this.state = {}
-  }
-
   public render () {
-    const {} = this.props
+    const { className } = this.props
 
     return (
-      <Wrapper>
+      <Wrapper className={className}>
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 150'>
           <g>
             <g>
@@ -36,6 +33,6 @@ export default class Logo extends React.Component<ILogoProps, ILogoState> {
 const Wrapper = styled.span(({ theme }) => ({
   fill: theme.bgDarker,
   svg: {
-    width: '48px'
-  }
+    width: '48px',
+  },
 }))

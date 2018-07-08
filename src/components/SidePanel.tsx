@@ -3,23 +3,20 @@ import * as React from 'react'
 import styled from '../styles/theme'
 
 export interface ISidePanelProps {
+  className?: string
   header?: React.ReactNode
+  expanded?: boolean
 }
 
 export interface ISidePanelState {}
 
 export default class SidePanel extends React.Component<ISidePanelProps, ISidePanelState> {
 
-  public constructor (props: ISidePanelProps) {
-    super(props)
-    this.state = {}
-  }
-
   public render () {
-    const { header, children } = this.props
+    const { className, header, children, expanded = false } = this.props
 
     return (
-      <Wrapper>
+      <Wrapper className={className} expanded={expanded}>
         {header && <Header>{header}</Header>}
         <Container>{children}</Container>
       </Wrapper>
@@ -28,7 +25,7 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
 
 }
 
-const Wrapper = styled.div(({ theme }) => ({
+const Wrapper = styled.div<{expanded: boolean}>(({ theme, expanded }) => ({
   position: 'absolute',
   zIndex: 5,
   top: 0,
@@ -36,7 +33,9 @@ const Wrapper = styled.div(({ theme }) => ({
   width: '300px',
   height: '100%',
   background: theme.bgLighter,
-  boxShadow: theme.boxShadow
+  boxShadow: theme.boxShadow,
+  transform: expanded ? 'translateX(0)' : 'translateX(-300px)',
+  transition: 'transform 0.3s ease',
 }))
 
 const Header = styled.div(({ theme }) => ({
@@ -44,11 +43,11 @@ const Header = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   height: '60px',
-  borderBottom: theme.border
+  borderBottom: theme.border,
 }))
 
 const Container = styled.div(() => ({
   padding: '15px',
   flex: 1,
-  overflowY: 'auto'
+  overflowY: 'auto',
 }))

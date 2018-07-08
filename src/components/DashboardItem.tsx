@@ -3,7 +3,8 @@ import styled from '../styles/theme'
 import Icon from './Icon'
 
 export interface IDashboardItemProps {
-  active: boolean
+  className?: string
+  active?: boolean
 }
 
 export interface IDashboardItemState {}
@@ -16,10 +17,10 @@ export default class DashboardItem extends React.Component<IDashboardItemProps, 
   }
 
   public render () {
-    const { active, children } = this.props
+    const { className, children, active = false } = this.props
 
     return (
-      <Wrapper active={active}>
+      <Wrapper className={className} active={active}>
         <StyledIcon name='Inbox'/>
         <Content>{children}</Content>
       </Wrapper>
@@ -28,27 +29,29 @@ export default class DashboardItem extends React.Component<IDashboardItemProps, 
 
 }
 
-const Wrapper = styled.div<{active: boolean}>(({ active, theme }) => ({
+const Wrapper = styled.div<{active: boolean}>(({ theme, active }) => ({
   marginBottom: '8px',
   padding: '0 10px',
   display: 'flex',
   alignItems: 'center',
   height: '36px',
   cursor: 'pointer',
+  fontSize: '14px',
   color: active ? theme.fgDark : theme.fgLight,
   background: active ? theme.bgDark : 'transparent',
   borderRadius: theme.borderRadius,
+  userSelect: 'none',
   transition: 'background 0.3s, color 0.3s',
   '&:hover': {
     color: active ? theme.fgDark : theme.fg,
     background: active ? theme.bgDark : theme.bg,
-  }
+  },
 }))
 
 const StyledIcon = styled(Icon)(({ theme }) => ({
-  color: theme.fgLight
+  color: theme.fgLight,
 }))
 
 const Content = styled.div(() => ({
-  marginLeft: '10px'
+  marginLeft: '10px',
 }))
