@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Subscription } from 'rxjs'
 import { Route, RouteComponentProps, Redirect, Switch } from 'react-router'
 import { create } from 'rxjs-spy'
 import { tag } from 'rxjs-spy/operators/tag'
@@ -14,7 +15,6 @@ import { IBoard } from '../models'
 import boardService from '../services/boardService'
 import Input from '../components/Input'
 import Icon from '../components/Icon'
-import { Subscription } from 'rxjs'
 
 const spy = create()
 
@@ -26,15 +26,15 @@ export interface IHomeProps extends RouteComponentProps<{}> {}
 export interface IHomeState {
   loading: boolean
   expanded: boolean
-  additionVisible: boolean
-  additionContent: string
+  adding: boolean
+  addingTitle: string
   boards: IBoard[]
   board: IBoard | null
 }
 
 export default class Home extends React.Component<IHomeProps, IHomeState> {
 
-  public refAdditionInput = React.createRef<Input>()
+  public refAddingInput = React.createRef<Input>()
 
   public boards$!: Subscription
 
@@ -43,8 +43,8 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   public state: IHomeState = {
     loading: true,
     expanded: false,
-    additionVisible: false,
-    additionContent: '',
+    adding: false,
+    addingTitle: '',
     boards: [],
     board: null,
   }
@@ -68,29 +68,29 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   }
 
   public onToggleSidePanel = () => {
-    this.setState({ expanded: !this.state.expanded, additionVisible: false })
+    this.setState({ expanded: !this.state.expanded, adding: false })
   }
 
-  public onToggleAddition = () => {
-    const visible = !this.state.additionVisible
-    const $input = this.refAdditionInput.current
+  public onToggleAdding = () => {
+    const visible = !this.state.adding
+    const $input = this.refAddingInput.current
     
-    this.setState({ additionVisible: visible, additionContent: '' })
+    this.setState({ adding: visible, addingTitle: '' })
 
     if (visible && $input) {
       $input.focus()
     }
   }
 
-  public onAdditionContentChange = (value: string) => {
-    this.setState({ additionContent: value })
+  public onAddingTitleChange = (value: string) => {
+    this.setState({ addingTitle: value })
   }
 
-  public onAdditionConfirm = async () => {
-    const title = this.state.additionContent.trim()
+  public onAddingConfirm = async () => {
+    const title = this.state.addingTitle.trim()
 
     await boardService.addBoard(title)
-    this.setState({ additionVisible: false, additionContent: '' })
+    this.setState({ adding: false, addingTitle: '' })
   }
 
   public onBoardClick = (board: IBoard) => {
@@ -98,7 +98,7 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   }
 
   public render () {
-    const { loading, expanded, additionVisible, additionContent, boards, board } = this.state
+    const { loading, expanded, adding, addingTitle, boards, board } = this.state
 
     if (loading) {
       return null
@@ -127,27 +127,27 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
                 <SidePanelTitle>Boards ({boards.length})</SidePanelTitle>
                 <Button
                   size='large'
-                  icon={additionVisible ? 'Minus' : 'Plus'}
-                  onClick={this.onToggleAddition}
+                  icon={adding ? 'Minus' : 'Plus'}
+                  onClick={this.onToggleAdding}
                 />
               </React.Fragment>
             )}
             headerExtra={(
-              <Addition visible={additionVisible}>
+              <Addition visible={adding}>
                 <Icon name='Inbox'/>
                 <Input
                   full
-                  ref={this.refAdditionInput}
+                  ref={this.refAddingInput}
                   size='small'
-                  value={additionContent}
-                  onChange={this.onAdditionContentChange}
-                  onEnter={this.onAdditionConfirm}
+                  value={addingTitle}
+                  onChange={this.onAddingTitleChange}
+                  onEnter={this.onAddingConfirm}
                 />
                 <Button
                   size='small'
                   icon='Check'
-                  disabled={!additionContent.trim()}
-                  onClick={this.onAdditionConfirm}
+                  disabled={!addingTitle.trim()}
+                  onClick={this.onAddingConfirm}
                 />
               </Addition>
             )}
