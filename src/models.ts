@@ -1,34 +1,57 @@
-export interface IBaseModel {
-  id: string
+export interface IBase {
+  id: number
+  createdAt: number
 }
 
-export interface IBoard extends IBaseModel {
+export interface IBoardAttributes {
   title: string
-  archived: string
-  archivedAt: string
-  createdAt: string
+  archived: boolean
+  archivedAt: number
 }
 
-export interface IGroup extends IBaseModel {
-  boardId: string
+export interface IGroupAttributes {
+  boardId: number
   title: string
   color: string
 }
 
-export interface ITask extends IBaseModel {
-  boardId: string
-  groupId: string
+export interface ITaskAttributes {
+  boardId: number
+  groupId: number
   content: string
   contentHtml: string
   finished: boolean
-  finishedAt: string
-  createdAt: string
-  DueAt: string
+  finishedAt: number
+  DueAt: number
   tagIds: string[]
 }
 
-export interface ITag extends IBaseModel {
-  boardId: string
+export interface ITagAttributes {
+  boardId: number
   title: string
   color: string
 }
+
+export function createModel<T extends IBase> (attributes: any): T {
+  return { ...attributes, createdAt: Date.now() }
+}
+
+export function addModel<T extends IBase> (list: T[], newItem: T) {
+  return [newItem, ...list]
+}
+
+export function updateModel<T extends IBase> (list: T[], existedItem: T) {
+  return list.map((item) => item.id === existedItem.id ? Object.assign({}, item, existedItem) : item)
+}
+
+export function removeModel<T extends IBase> (list: T[], id: number) {
+  return list.filter((item) => item.id !== id)
+}
+
+export interface IBoard extends IBase, IBoardAttributes {}
+
+export interface IGroup extends IBase, IGroupAttributes {}
+
+export interface ITask extends IBase, ITaskAttributes {}
+
+export interface ITag extends IBase, ITagAttributes {}
