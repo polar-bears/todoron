@@ -71,6 +71,7 @@ const DateInfo = styled.span(({ theme }) => ({
   fontSize: '12px',
   color: theme.fgLight,
   verticalAlign: 'text-bottom',
+  userSelect: 'none',
 }))
 
 const Container = styled.div(() => ({

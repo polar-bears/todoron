@@ -1,28 +1,39 @@
 import * as React from 'react'
 import styled from '../styles/theme'
 import Icon from './Icon'
+import { IBoard } from '../models'
 
-export interface IDashboardItemProps {
+export interface IBoardItemProps {
   className?: string
   active?: boolean
+  board: IBoard
+  onClick?: (board: IBoard) => void
 }
 
-export interface IDashboardItemState {}
+export interface IBoardItemState {}
 
-export default class DashboardItem extends React.Component<IDashboardItemProps, IDashboardItemState> {
+export default class BoardItem extends React.Component<IBoardItemProps, IBoardItemState> {
 
-  public constructor (props: IDashboardItemProps) {
+  public constructor (props: IBoardItemProps) {
     super(props)
     this.state = {}
   }
 
+  public onClick = () => {
+    const { board, onClick } = this.props
+
+    if (onClick) {
+      onClick(board)
+    }
+  }
+
   public render () {
-    const { className, children, active = false } = this.props
+    const { className, board, active = false } = this.props
 
     return (
-      <Wrapper className={className} active={active}>
+      <Wrapper className={className} active={active} onClick={this.onClick}>
         <StyledIcon name='Inbox'/>
-        <Content>{children}</Content>
+        <Content>{board.title}</Content>
       </Wrapper>
     )
   }
@@ -35,6 +46,7 @@ const Wrapper = styled.div<{active: boolean}>(({ theme, active }) => ({
   display: 'flex',
   alignItems: 'center',
   height: '36px',
+  width: '100%',
   cursor: 'pointer',
   fontSize: '14px',
   color: active ? theme.fgDark : theme.fgLight,
@@ -53,5 +65,10 @@ const StyledIcon = styled(Icon)(({ theme }) => ({
 }))
 
 const Content = styled.div(() => ({
-  marginLeft: '10px',
+  marginLeft: '8px',
+  flex: 1,
+}))
+
+const Actions = styled.div(() => ({
+  marginLeft: '8px',
 }))

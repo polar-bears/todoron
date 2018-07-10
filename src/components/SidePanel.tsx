@@ -5,6 +5,7 @@ import styled from '../styles/theme'
 export interface ISidePanelProps {
   className?: string
   header?: React.ReactNode
+  headerExtra?: React.ReactNode
   expanded?: boolean
 }
 
@@ -13,11 +14,12 @@ export interface ISidePanelState {}
 export default class SidePanel extends React.Component<ISidePanelProps, ISidePanelState> {
 
   public render () {
-    const { className, header, children, expanded = false } = this.props
+    const { className, header, headerExtra, children, expanded = false } = this.props
 
     return (
       <Wrapper className={className} expanded={expanded}>
         {header && <Header>{header}</Header>}
+        {headerExtra && <HeaderExtra>{headerExtra}</HeaderExtra>}
         <Container>{children}</Container>
       </Wrapper>
     )
@@ -26,6 +28,8 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
 }
 
 const Wrapper = styled.div<{expanded: boolean}>(({ theme, expanded }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   position: 'absolute',
   zIndex: 5,
   top: 0,
@@ -45,6 +49,8 @@ const Header = styled.div(({ theme }) => ({
   height: '60px',
   borderBottom: theme.border,
 }))
+
+const HeaderExtra = styled.div()
 
 const Container = styled.div(() => ({
   padding: '15px',

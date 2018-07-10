@@ -8,6 +8,8 @@ export type ButtonSize = 'small' | 'medium' | 'large'
 export interface IButtonProps {
   className?: string
   size?: ButtonSize
+  full?: boolean
+  disabled?: boolean
   icon?: string
   onClick?: React.MouseEventHandler
 }
@@ -16,11 +18,25 @@ export interface IButtonState {}
 
 export default class Button extends React.Component<IButtonProps, IButtonState> {
 
+  public onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const { disabled, onClick } = this.props
+
+    if (!disabled && onClick) {
+      onClick(e)
+    }
+  }
+
   public render () {
-    const { className, icon, size = 'medium', children, onClick } = this.props
+    const { className, icon, disabled = false, full = false, size = 'medium', children } = this.props
 
     return (
-      <Wrapper className={className} size={size} onClick={onClick}>
+      <Wrapper
+        className={className}
+        full={full}
+        size={size}
+        disabled={disabled}
+        onClick={this.onClick}
+      >
         <Icon name={icon} size={size}/>
         {children && <Content>{children}</Content>}
       </Wrapper>
@@ -35,22 +51,27 @@ const sizes = {
   large: { padding: '0 10px', fontSize: '16px', height: '42px', minWidth: '42px' },
 }
 
-const Wrapper = styled.button<{size: ButtonSize}>(({ size, theme }) => ({
+const Wrapper = styled.button<{
+  full: boolean,
+  disabled: boolean,
+  size: ButtonSize,
+}>(({ full, size, disabled, theme }) => ({
   ...sizes[size],
   display: 'flex',
   alignItems: 'center',
+  width: full ? '100%' : 'auto',
   border: 'none',
   outline: 'none',
   color: theme.fgLight,
   background: 'transparent',
-  textAlign: 'center',
-  transition: 'background 0.3s, colo 0.3s',
   borderRadius: theme.borderRadius,
-  '&:hover': {
+  textAlign: 'center',
+  transition: 'background 0.3s, color 0.3s',
+  '&:hover': !disabled && {
     color: theme.fg,
     background: theme.bgDark,
   },
-  '&:active': {
+  '&:active': !disabled && {
     color: theme.fgDark,
     background: theme.bgDarker,
   },
