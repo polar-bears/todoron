@@ -5,29 +5,38 @@ import Group from '../components/Group'
 import Button from '../components/Button'
 import TaskCard from '../components/TaskCard'
 import TagContext from '../components/TagContext'
+import boardService from '../services/boardService'
+import { RouteComponentProps } from 'react-router'
 
-export interface IDashboardProps {}
+export interface IBoardProps extends RouteComponentProps<{boardId: string}> {}
 
-export interface IDashboardState {}
+export interface IBoardState {}
 
-export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
+export default class Board extends React.Component<IBoardProps, IBoardState> {
 
-  public constructor (props: IDashboardProps) {
+  public static getDerivedStateFromProps (nextProps: IBoardProps) {
+    const boardId = Number(nextProps.match.params.boardId)
+
+    boardService.selectBoard(boardId)
+    return null
+  }
+
+  public constructor (props: IBoardProps) {
     super(props)
     this.state = {}
   }
 
   public render () {
     const task = {
-      id: '',
-      boardId: '',
-      groupId: '',
+      id: 0,
+      boardId: 0,
+      groupId: 0,
       content: 'Asset support for functional components',
       contentHtml: '',
       finished: false,
-      finishedAt: '',
-      createdAt: '',
-      DueAt: '',
+      finishedAt: 0,
+      createdAt: 0,
+      DueAt: 0,
       tagIds: [],
     }
 
