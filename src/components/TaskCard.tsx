@@ -1,12 +1,15 @@
 import * as React from 'react'
+import createTimeAgo from 'timeago.js'
 
 import styled from '../styles/theme'
 import Card from './Card'
 import Tag from './Tag'
-import { ITask, ITag } from '../models'
+import Icon from './Icon'
 import Checkbox from './Checkbox'
 import TagContext from './TagContext'
-import Icon from './Icon'
+import { ITask, ITag } from '../models'
+
+const timeAgo = createTimeAgo()
 
 export interface ITaskCardContext {
   tags: ITag[]
@@ -20,26 +23,34 @@ export interface ITaskCardState {}
 
 class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext, ITaskCardState> {
 
+  private get tags () {
+    const { tags, task } = this.props
+
+    return tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
+  }
+
   public render () {
     const { task } = this.props
 
     return (
-      <Card stacked>
+      <Card>
         <Header>
           <Title>
             <Checkbox/>
-            <DateInfo>Created at 5 minutes ago</DateInfo>
+            <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
           </Title>
-          <Tag color='#82C788'>NORMAL</Tag>
+          {this.tags.map((tag) => (
+            <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
+          ))}
         </Header>
         <Container>{task.content}</Container>
         <Footer>
-          <DueTime overdue>
+          {/* <DueTime overdue>
             <DueTimeIcon size='small' name='Clock'/>
             <DueTimeDetail>
               Today at 10:00 am
             </DueTimeDetail>
-          </DueTime>
+          </DueTime> */}
         </Footer>
       </Card>
     )

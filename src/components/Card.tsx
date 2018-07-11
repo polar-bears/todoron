@@ -28,7 +28,7 @@ export default class Card extends React.Component<ICardProps, ICardState> {
 
 const Wrapper = styled.div<{stacked: boolean}>(({ theme, stacked }) => ({
   position: 'relative',
-  '&::before': {
+  '&::before': stacked && {
     position: 'absolute',
     bottom: '-4px',
     left: '5px',

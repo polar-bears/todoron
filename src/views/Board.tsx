@@ -1,65 +1,110 @@
 import * as React from 'react'
+import { Subscription } from 'rxjs'
+import { tag } from 'rxjs-spy/operators/tag'
 
 import styled from '../styles/theme'
 import Group from '../components/Group'
 import Button from '../components/Button'
 import TaskCard from '../components/TaskCard'
 import TagContext from '../components/TagContext'
+import groupService from '../services/groupService'
 import boardService from '../services/boardService'
+import GroupAddition from '../components/GroupAddition'
+import TaskAddition from '../components/TaskAddition'
 import { RouteComponentProps } from 'react-router'
+import { ITag, IGroup, IBoard } from '../models'
 
 export interface IBoardProps extends RouteComponentProps<{boardId: string}> {}
 
-export interface IBoardState {}
+export interface IBoardState {
+  loading: boolean
+  board: IBoard | null
+  groups: IGroup[]
+  tags: ITag[]
+}
 
 export default class Board extends React.Component<IBoardProps, IBoardState> {
 
   public static getDerivedStateFromProps (nextProps: IBoardProps) {
     const boardId = Number(nextProps.match.params.boardId)
-
+    
+    // todo: selected an old id
     boardService.selectBoard(boardId)
+
     return null
   }
 
-  public constructor (props: IBoardProps) {
-    super(props)
-    this.state = {}
+  private board$!: Subscription
+
+  private groups$!: Subscription
+
+  private tag$!: Subscription
+
+  public state: IBoardState = {
+    board: null,
+    loading: true,
+    groups: [],
+    tags: [],
+  }
+
+  public componentDidMount () {
+    this.board$ = boardService.board$
+      .subscribe((board) => this.setState({ board }))
+
+    this.groups$ = groupService.groups$
+      .pipe(tag('groups$'))
+      .subscribe((groups) => this.setState({ groups, loading: false }))
+  }
+
+  public componentWillUnmount () {
+    this.groups$.unsubscribe()
+  }
+
+  private onAddGroup = (title: string, reset: () => void) => {
+    const boardId = this.state.board!.id
+
+    groupService.addGroup(boardId, title, '')
+
+    reset()
+  }
+
+  private onAddTask = ({ groupId, content }: any, reset: (reopen: boolean) => void, fromShortcut: boolean) => {
+    groupService.addTask(groupId, content, '', -1, [])
+
+    reset(fromShortcut)
   }
 
   public render () {
-    const task = {
-      id: 0,
-      boardId: 0,
-      groupId: 0,
-      content: 'Asset support for functional components',
-      contentHtml: '',
-      finished: false,
-      finishedAt: 0,
-      createdAt: 0,
-      DueAt: 0,
-      tagIds: [],
+    const { loading, groups } = this.state
+
+    if (loading) {
+      return null
     }
 
-    const tags: any[] = []
-
     return (
-      <TagContext.Provider value={{ tags }}>
+      <TagContext.Provider value={{ tags: [] }}>
         <Wrapper>
           <Header/>
           <Container>
-            <Group
-              title='Issues (3)'
-              actions={(
-                <React.Fragment>
-                  <Button size='small' icon='MoreVertical'/>
-                </React.Fragment>
-              )}
-            >
-            <TaskCard task={task}/>
-            <TaskCard task={task}/>
-            <TaskCard task={task}/>
-            <TaskCard task={task}/>
-            </Group>
+            {groups.map((group) => (
+              <Group
+                key={group.id}
+                title={`${group.title} (${group.tasks.length})`}
+                actions={(
+                  <React.Fragment>
+                    <Button size='small' icon='MoreVertical'/>
+                  </React.Fragment>
+                )}
+                footer={(
+                  <TaskAddition groupId={group.id} onConfirm={this.onAddTask}/>
+                )}
+              >
+              {group.tasks.map((task) => (
+                <TaskCard key={task.id} task={task}/>
+              ))}
+              </Group>
+            ))}
+            <Group header={<GroupAddition onConfirm={this.onAddGroup}/>}/>
           </Container>
         </Wrapper>
       </TagContext.Provider>
@@ -78,4 +123,9 @@ const Header = styled.div()
 const Container = styled.div(() => ({
   padding: '20px 20px 50px',
   height: '100%',
+  overflowX: 'scroll',
+  whiteSpace: 'nowrap',
+  '& > div': {
+    whiteSpace: 'normal',
+  },
 }))

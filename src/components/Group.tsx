@@ -4,8 +4,10 @@ import styled from '../styles/theme'
 
 export interface IGroupProps {
   className?: string
+  header?: React.ReactNode
   title?: React.ReactNode
   actions?: React.ReactNode
+  footer?: React.ReactNode
 }
 
 export interface IGroupState {}
@@ -13,15 +15,22 @@ export interface IGroupState {}
 export default class Group extends React.Component<IGroupProps, IGroupState> {
 
   public render () {
-    const { className, title, actions, children } = this.props
+    const { className, header, title, actions, children, footer } = this.props
 
     return (
       <Wrapper className={className}>
         <Header>
-          <Title>{title}</Title>
-          <Actions>{actions}</Actions>
+          {header || (
+            <React.Fragment>
+              <Title>{title}</Title>
+              <Actions>{actions}</Actions>
+            </React.Fragment>
+          )}
         </Header>
         <Container>{children}</Container>
+        {footer && (
+          <Footer>{footer}</Footer>
+        )}
       </Wrapper>
     )
   }
@@ -29,7 +38,8 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
 }
 
 const Wrapper = styled.div(({ theme }) => ({
-  display: 'flex',
+  marginRight: '10px',
+  display: 'inline-flex',
   flexDirection: 'column',
   width: '300px',
   maxHeight: '100%',
@@ -38,22 +48,28 @@ const Wrapper = styled.div(({ theme }) => ({
 }))
 
 const Header = styled.div(() => ({
-  padding: '0 10px',
   display: 'flex',
   alignItems: 'center',
   minHeight: '40px',
 }))
 
 const Title = styled.div(({ theme }) => ({
+  marginLeft: '10px',
   flex: 1,
   color: theme.fg,
   fontSize: '14px',
 }))
 
-const Actions = styled.div()
+const Actions = styled.div(() => ({
+  marginRight: '10px',
+}))
 
 const Container = styled.div(() => ({
-  padding: '10px',
   flex: '1',
   overflowY: 'auto',
+  '&:not(:empty)': {
+    padding: '10px',
+  },
 }))
+
+const Footer = styled.div()

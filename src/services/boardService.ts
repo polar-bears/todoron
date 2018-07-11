@@ -1,12 +1,14 @@
 import { Observable, Subject } from 'rxjs'
-import { scan, shareReplay, map, combineLatest, distinctUntilChanged } from 'rxjs/operators'
+import { scan, shareReplay, map, combineLatest, distinctUntilChanged, switchMap, concatMap } from 'rxjs/operators'
 
-import db from '../db'
-import { IBoard, IBoardAttributes, createModel, updateModel, removeModel, addModel } from '../models'
+import { IBoard, IBoardAttributes, updateModel, removeModel, addModel } from '../models'
+import store from '../store'
 
 const initialBoards: IBoard[] = []
 
 type BoardsGetter = (boards: IBoard[]) => IBoard[]
+
+type AddBoardData = {boardId: number, boardAttrs: Partial<IBoardAttributes>}
 
 export class BoardService {
   
@@ -18,11 +20,11 @@ export class BoardService {
 
   private select$: Subject<number> = new Subject()
 
-  public loadBoard$: Subject<IBoard[]> = new Subject()
+  public loadBoards$: Subject<void> = new Subject()
 
-  public addBoard$: Subject<IBoard> = new Subject()
+  public addBoard$: Subject<string> = new Subject()
 
-  public updateBoard$: Subject<IBoard> = new Subject()
+  public updateBoard$: Subject<AddBoardData> = new Subject()
 
   public removeBoard$: Subject<number> = new Subject()
 
@@ -38,60 +40,44 @@ export class BoardService {
       shareReplay(1),
     )
 
-    this.loadBoard$.pipe(
+    this.loadBoards$.pipe(
+      switchMap(() => store.listBoards()),
       map((boards) => () => boards),
     ).subscribe(this.update$)
 
     this.addBoard$.pipe(
-      map((board) => (boards: IBoard[]) => addModel(boards, board)),
+      concatMap((title) => store.addBoard(title)),
+      map((board) => (boards: IBoard[]) => addModel(boards, board, true)),
     ).subscribe(this.update$)
 
-    this.addBoard$.pipe(
-      map((board) => board.id),
-    ).subscribe(this.select$)
-
     this.updateBoard$.pipe(
+      concatMap(({ boardId, boardAttrs }) => store.updateBoard(boardId, boardAttrs)),
       map((board) => (boards: IBoard[]) => updateModel(boards, board)),
     ).subscribe(this.update$)
 
     this.removeBoard$.pipe(
-      map((id) => (boards: IBoard[]) => removeModel(boards, id)),
+      concatMap((boardId) => store.removeBoard(boardId)),
+      map((boardId) => (boards: IBoard[]) => removeModel(boards, boardId)),
     ).subscribe(this.update$)
   }
 
-  public async loadBoards () {
-    let boards = await db.boards.orderBy('createdAt').reverse().toArray()
-    
-    if (!boards.length) {
-      await db.boards.add(createModel({ title: 'default', archived: false, archivedAt: -1 }))
-      boards = await db.boards.toArray()
-    }
-
-    this.loadBoard$.next(boards)
+  public loadBoards () {
+    this.loadBoards$.next()
   }
 
-  public async addBoard (title: string) {
-    const newBoard: IBoardAttributes = { title, archived: false, archivedAt: -1 }
-    const boardId = await db.boards.add(createModel(newBoard))
-    const board = await db.boards.get(boardId)
-
-    this.addBoard$.next(board)
+  public addBoard (title: string) {
+    this.addBoard$.next(title)
   }
 
-  public async updateBoard (id: number, newBoard: Partial<IBoardAttributes>) {
-    const boardId = await db.boards.update(id, newBoard)
-    const board = await db.boards.get(boardId)
-
-    this.updateBoard$.next(board)
+  public updateBoard (boardId: number, boardAttrs: Partial<IBoardAttributes>) {
+    this.updateBoard$.next({ boardId, boardAttrs })
   }
 
-  public async removeBoard (id: number) {
-    await db.boards.delete(id)
-
+  public removeBoard (id: number) {
     this.removeBoard$.next(id)
   }
 
-  public async selectBoard (id: number) {
+  public selectBoard (id: number) {
     this.select$.next(id)
   }
 }

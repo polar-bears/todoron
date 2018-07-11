@@ -59,6 +59,7 @@ const Wrapper = styled.button<{
   ...sizes[size],
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'center',
   width: full ? '100%' : 'auto',
   border: 'none',
   outline: 'none',

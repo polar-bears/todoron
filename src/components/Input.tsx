@@ -12,7 +12,8 @@ export interface IInputProps {
   autoFocus?: boolean
   placeholder?: string
   onChange?: (value: string, e: React.ChangeEvent<HTMLInputElement>) => void
-  onEnter?: () => void
+  onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 export interface IInputState {}
@@ -44,10 +45,18 @@ export default class Input extends React.Component<IInputProps, IInputState> {
   }
 
   private onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const { disabled, onEnter } = this.props
+    const { disabled, onKeyUp, onEnter } = this.props
 
-    if (!disabled && e.keyCode === 13 && onEnter) {
-      onEnter()
+    if (disabled) {
+      return
+    }
+
+    if (onKeyUp) {
+      onKeyUp(e)
+    }
+
+    if (onEnter && e.keyCode === 13 ) {
+      onEnter(e)
     }
   }
 

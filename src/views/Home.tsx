@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { Subscription } from 'rxjs'
 import { Route, RouteComponentProps, Redirect, Switch } from 'react-router'
-import { create } from 'rxjs-spy'
-import { tag } from 'rxjs-spy/operators/tag'
+import { tag } from 'rxjs-spy/operators'
 
 import styled from '../styles/theme'
 import Board from './Board'
@@ -11,15 +10,10 @@ import Logo from '../components/Logo'
 import Button from '../components/Button'
 import SidePanel from '../components/SidePanel'
 import BoardItem from '../components/BoardItem'
-import { IBoard } from '../models'
 import boardService from '../services/boardService'
 import Input from '../components/Input'
 import Icon from '../components/Icon'
-
-const spy = create()
-
-spy.log('boards$')
-spy.log('board$')
+import { IBoard } from '../models'
 
 export interface IHomeProps extends RouteComponentProps<{}> {}
 
@@ -34,11 +28,11 @@ export interface IHomeState {
 
 export default class Home extends React.Component<IHomeProps, IHomeState> {
 
-  public refAddingInput = React.createRef<Input>()
+  private refAddingInput = React.createRef<Input>()
 
-  public boards$!: Subscription
+  private boards$!: Subscription
 
-  public board$!: Subscription
+  private board$!: Subscription
 
   public state: IHomeState = {
     loading: true,
@@ -52,14 +46,13 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   public componentDidMount () {
     this.boards$ = boardService.boards$
       .pipe(tag('boards$'))
-      .subscribe((boards) => this.setState({ loading: false, boards }))
+      .subscribe((boards) => this.setState({ boards, loading: false }))
 
     this.board$ = boardService.board$
       .pipe(tag('board$'))
       .subscribe((board) => this.setState({ board }))
 
     boardService.loadBoards()
-    
   }
 
   public componentWillUnmount () {
@@ -67,11 +60,11 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
     this.board$.unsubscribe()
   }
 
-  public onToggleSidePanel = () => {
+  private onToggleSidePanel = () => {
     this.setState({ expanded: !this.state.expanded, adding: false })
   }
 
-  public onToggleAdding = () => {
+  private onToggleAdding = () => {
     const visible = !this.state.adding
     const $input = this.refAddingInput.current
     
@@ -82,18 +75,18 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
     }
   }
 
-  public onAddingTitleChange = (value: string) => {
+  private onAddingTitleChange = (value: string) => {
     this.setState({ addingTitle: value })
   }
 
-  public onAddingConfirm = async () => {
+  private onAddingConfirm = async () => {
     const title = this.state.addingTitle.trim()
 
     await boardService.addBoard(title)
     this.setState({ adding: false, addingTitle: '' })
   }
 
-  public onBoardClick = (board: IBoard) => {
+  private onBoardClick = (board: IBoard) => {
     this.props.history.push(`/boards/${board.id}`)
   }
 
