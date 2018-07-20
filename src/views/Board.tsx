@@ -1,18 +1,18 @@
 import * as React from 'react'
+import { RouteComponentProps } from 'react-router'
 import { Subscription } from 'rxjs'
 import { tag } from 'rxjs-spy/operators/tag'
 
-import styled from '../styles/theme'
-import Group from '../components/Group'
 import Button from '../components/Button'
-import TaskCard from '../components/TaskCard'
-import TagContext from '../components/TagContext'
-import groupService from '../services/groupService'
-import boardService from '../services/boardService'
+import Group from '../components/Group'
 import GroupAddition from '../components/GroupAddition'
+import TagContext from '../components/TagContext'
 import TaskAddition from '../components/TaskAddition'
-import { RouteComponentProps } from 'react-router'
-import { ITag, IGroup, IBoard } from '../models'
+import TaskCard from '../components/TaskCard'
+import boardService from '../services/boardService'
+import groupService from '../services/groupService'
+import styled from '../styles/theme'
+import { IBoard, IGroup, ITag } from '../models'
 
 export interface IBoardProps extends RouteComponentProps<{boardId: string}> {}
 

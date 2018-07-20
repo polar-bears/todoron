@@ -1,8 +1,8 @@
 import { Observable, Subject } from 'rxjs'
-import { scan, shareReplay, map, combineLatest, distinctUntilChanged, switchMap, concatMap } from 'rxjs/operators'
+import { combineLatest, concatMap, distinctUntilChanged, map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
-import { IBoard, IBoardAttributes, updateModel, removeModel, addModel } from '../models'
 import store from '../store'
+import { addModel, IBoard, IBoardAttributes, removeModel, updateModel } from '../models'
 
 const initialBoards: IBoard[] = []
 

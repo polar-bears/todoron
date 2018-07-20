@@ -1,5 +1,6 @@
 import Dexie from 'dexie'
-import { IBoard, IGroup, ITask, ITag } from './models'
+
+import { IBoard, IGroup, ITag, ITask } from './models'
 
 export class TodoronDB extends Dexie {
 

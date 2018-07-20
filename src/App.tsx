@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { create } from 'rxjs-spy'
 import { HashRouter as Router, Route } from 'react-router-dom'
+import { create } from 'rxjs-spy'
 import { ThemeProvider } from 'emotion-theming'
 
 import Home from './views/Home'

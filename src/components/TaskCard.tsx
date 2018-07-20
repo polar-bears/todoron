@@ -3,11 +3,11 @@ import createTimeAgo from 'timeago.js'
 
 import styled from '../styles/theme'
 import Card from './Card'
-import Tag from './Tag'
-import Icon from './Icon'
 import Checkbox from './Checkbox'
+import Icon from './Icon'
+import Tag from './Tag'
 import TagContext from './TagContext'
-import { ITask, ITag } from '../models'
+import { ITag, ITask } from '../models'
 
 const timeAgo = createTimeAgo()
 

@@ -1,9 +1,9 @@
 import { Observable, Subject } from 'rxjs'
-import { shareReplay, scan, map, switchMap, concatMap } from 'rxjs/operators'
+import { concatMap, map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
 import boardService from './boardService'
-import { IGroup, ITask, addModel, updateModel, removeModel, IGroupAttributes, ITaskAttributes } from '../models'
+import { addModel, IGroup, IGroupAttributes, ITask, ITaskAttributes, removeModel, updateModel } from '../models'
 
 const initialGroups: IGroup[] = []
 

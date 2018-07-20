@@ -1,5 +1,6 @@
-import { ITag } from '../models'
 import * as React from 'react'
+
+import { ITag } from '../models'
 
 export interface ITagContext {
   tags: ITag[]

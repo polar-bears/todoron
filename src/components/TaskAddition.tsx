@@ -1,8 +1,8 @@
 import * as React from 'react'
 
 import styled from '../styles/theme'
-import Card from './Card'
 import Button from './Button'
+import Card from './Card'
 import TagContext from './TagContext'
 import Textarea from './Textarea'
 import { ITag } from '../models'
@@ -123,10 +123,10 @@ class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdd
 export default function TaskAddition (props: ITaskAdditionProps) {
   return (
     <TagContext.Consumer>
-        {(context) => (
-          <OriginalTaskAddition {...context} {...props}/>
-        )}
-      </TagContext.Consumer>
+      {(context) => (
+        <OriginalTaskAddition {...context} {...props}/>
+      )}
+    </TagContext.Consumer>
   )
 }
 

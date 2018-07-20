@@ -1,11 +1,5 @@
 import db from './db'
-import {
-  createModel,
-  toMap,
-  IGroupAttributes,
-  IBoardAttributes,
-  ITaskAttributes,
-} from './models'
+import { createModel, IBoardAttributes, IGroupAttributes, ITaskAttributes, toMap } from './models'
 
 async function getBoard (boardId: number) {
   const board = await db.boards.get(boardId)
