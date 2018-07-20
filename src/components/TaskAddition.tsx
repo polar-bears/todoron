@@ -84,7 +84,7 @@ class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdd
     }
 
     return (
-      <Card>
+      <StyledCard>
         <Textarea
           autoFocus
           rows={3}
@@ -114,7 +114,7 @@ class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdd
             </DueTimeDetail>
           </DueTime>
         </Footer> */}
-      </Card>
+      </StyledCard>
     )
   }
 
@@ -129,6 +129,12 @@ export default function TaskAddition (props: ITaskAdditionProps) {
     </TagContext.Consumer>
   )
 }
+
+const StyledCard = styled(Card)(() => ({
+  marginBottom: '10px',
+  marginLeft: '10px',
+  marginRight: '10px',
+}))
 
 const Actions = styled.div(() => ({
   marginTop: '5px',

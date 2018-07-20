@@ -39,11 +39,13 @@ const Wrapper = styled.div<{stacked: boolean}>(({ theme, stacked }) => ({
     boxShadow: theme.boxShadowLight,
     borderRadius: theme.borderRadius,
   },
+  '&:not(:last-child)': {
+    marginBottom: '10px',
+  },
 }))
 
 const Inner = styled.div(({ theme }) => ({
   position: 'relative',
-  marginBottom: '10px',
   padding: '8px',
   fontSize: '14px',
   color: theme.fgDark,
