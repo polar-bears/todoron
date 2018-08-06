@@ -6,6 +6,7 @@ import { tag } from 'rxjs-spy/operators/tag'
 import Button from '../components/Button'
 import Group from '../components/Group'
 import GroupAddition from '../components/GroupAddition'
+import ScrollArea from '../components/ScrollArea'
 import TagContext from '../components/TagContext'
 import TaskAddition from '../components/TaskAddition'
 import TaskCard from '../components/TaskCard'
@@ -85,27 +86,29 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
       <TagContext.Provider value={{ tags: [] }}>
         <Wrapper>
           <Header/>
-          <Container>
-            {groups.map((group) => (
-              <Group
-                key={group.id}
-                title={`${group.title} (${group.tasks.length})`}
-                actions={(
-                  <React.Fragment>
-                    <Button size='small' icon='MoreVertical'/>
-                  </React.Fragment>
-                )}
-                footer={(
-                  <TaskAddition groupId={group.id} onConfirm={this.onAddTask}/>
-                )}
-              >
-              {group.tasks.map((task) => (
-                <TaskCard key={task.id} task={task}/>
+          <ScrollArea direction='horizontal'>
+            <Container>
+              {groups.map((group) => (
+                <Group
+                  key={group.id}
+                  title={`${group.title} (${group.tasks.length})`}
+                  actions={(
+                    <React.Fragment>
+                      <Button size='small' icon='MoreVertical'/>
+                    </React.Fragment>
+                  )}
+                  footer={(
+                    <TaskAddition groupId={group.id} onConfirm={this.onAddTask}/>
+                  )}
+                >
+                {group.tasks.map((task) => (
+                  <TaskCard key={task.id} task={task}/>
+                ))}
+                </Group>
               ))}
-              </Group>
-            ))}
-            <Group header={<GroupAddition onConfirm={this.onAddGroup}/>}/>
-          </Container>
+              <Group header={<GroupAddition onConfirm={this.onAddGroup}/>}/>
+            </Container>
+          </ScrollArea>
         </Wrapper>
       </TagContext.Provider>
     )
@@ -123,7 +126,6 @@ const Header = styled.div()
 const Container = styled.div(() => ({
   padding: '20px 20px 50px',
   height: '100%',
-  overflowX: 'scroll',
   whiteSpace: 'nowrap',
   '& > div': {
     whiteSpace: 'normal',

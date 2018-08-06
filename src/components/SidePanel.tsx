@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import styled from '../styles/theme'
+import ScrollArea from './ScrollArea'
 
 export interface ISidePanelProps {
   className?: string
@@ -20,7 +21,11 @@ export default class SidePanel extends React.Component<ISidePanelProps, ISidePan
       <Wrapper className={className} expanded={expanded}>
         {header && <Header>{header}</Header>}
         {headerExtra && <HeaderExtra>{headerExtra}</HeaderExtra>}
-        <Container>{children}</Container>
+        <StyledScrollArea>
+          <Container>
+              {children}
+          </Container>
+        </StyledScrollArea>
       </Wrapper>
     )
   }
@@ -52,8 +57,10 @@ const Header = styled.div(({ theme }) => ({
 
 const HeaderExtra = styled.div()
 
+const StyledScrollArea = styled(ScrollArea)(() => ({
+  flex: 1,
+}))
+
 const Container = styled.div(() => ({
   padding: '15px',
-  flex: 1,
-  overflowY: 'auto',
 }))
