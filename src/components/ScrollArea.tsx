@@ -15,6 +15,8 @@ export interface IScrollAreaProps {
 }
 
 export interface IScrollAreaState {
+  shadowTopVisible: boolean,
+  shadowBottomVisible: boolean,
   trackVerticalVisible: boolean
   thumbVerticalStyle: any
   trackHorizontalVisible: boolean
@@ -41,6 +43,8 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
   private dragPosition: number = 0
 
   public state: IScrollAreaState = {
+    shadowTopVisible: false,
+    shadowBottomVisible: false,
     trackVerticalVisible: false,
     thumbVerticalStyle: {},
     trackHorizontalVisible: false,
@@ -88,7 +92,12 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
       ? this.getThumbHorizontalStyle(left, clientWidth, scrollWidth)
       : {}
 
+    let shadowTopVisible = trackVerticalVisible ? scrollTop > 0 : false
+    let shadowBottomVisible = trackVerticalVisible ? Math.ceil(scrollTop) + clientHeight < scrollHeight : false
+
     this.setState({
+      shadowTopVisible,
+      shadowBottomVisible,
       trackVerticalVisible,
       thumbVerticalStyle,
       trackHorizontalVisible,
@@ -193,6 +202,8 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
   public render () {
     const { className, style, direction = 'vertical', children } = this.props
     const {
+      shadowTopVisible,
+      shadowBottomVisible,
       trackVerticalVisible,
       thumbVerticalStyle,
       trackHorizontalVisible,
@@ -208,6 +219,8 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
         <TrackHorizontal innerRef={this.refTrackHorizontal} visible={trackHorizontalVisible}>
           <ThumbHorizontal innerRef={this.refThumbHorizontal} style={thumbHorizontalStyle}/>
         </TrackHorizontal>
+        <ShadowTop visible={shadowTopVisible}/>
+        <ShadowBottom visible={shadowBottomVisible}/>
       </Wrapper>
     )
   }
@@ -249,6 +262,7 @@ const Container = styled.div<{direction: DirectionType}>(({ direction }) => (
 
 const TrackVertical = styled.div<{visible: boolean}>(({ visible }) => ({
   position: 'absolute',
+  zIndex: 1,
   top: 0,
   right: 0,
   height: '100%',
@@ -270,6 +284,7 @@ const ThumbVertical = styled.div(({ theme }) => ({
 
 const TrackHorizontal = styled.div<{visible: boolean}>(({ visible }) => ({
   position: 'absolute',
+  zIndex: 1,
   bottom: 0,
   left: 0,
   height: '3px',
@@ -287,4 +302,28 @@ const ThumbHorizontal = styled.div(({ theme }) => ({
   '&:active': {
     background: theme.bgDarker,
   },
+}))
+
+const ShadowTop = styled.div<{visible: boolean}>(({ visible }) => ({
+  userSelect: 'none',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '6px',
+  background: 'linear-gradient(rgba(0, 0, 0, 0.08), transparent)',
+  opacity: visible ? 1 : 0,
+  transition: 'opacity 0.3s',
+}))
+
+const ShadowBottom = styled.div<{visible: boolean}>(({ visible }) => ({
+  userSelect: 'none',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  width: '100%',
+  height: '6px',
+  background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.08))',
+  opacity: visible ? 1 : 0,
+  transition: 'opacity 0.3s',
 }))
