@@ -131,9 +131,7 @@ export default function TaskAddition (props: ITaskAdditionProps) {
 }
 
 const StyledCard = styled(Card)(() => ({
-  marginBottom: '10px',
-  marginLeft: '10px',
-  marginRight: '10px',
+  margin: '10px',
 }))
 
 const Actions = styled.div(() => ({

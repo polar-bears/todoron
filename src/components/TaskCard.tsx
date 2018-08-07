@@ -4,7 +4,6 @@ import createTimeAgo from 'timeago.js'
 import styled from '../styles/theme'
 import Card from './Card'
 import Checkbox from './Checkbox'
-import Icon from './Icon'
 import Tag from './Tag'
 import TagContext from './TagContext'
 import { ITag, ITask } from '../models'
@@ -94,17 +93,17 @@ const Footer = styled.div(() => ({
   marginTop: '8px',
 }))
 
-const DueTime = styled.span<{overdue: boolean}>(({ theme, overdue }) => ({
-  color: overdue ? theme.colors.red : theme.fg,
-  userSelect: 'none',
-}))
+// const DueTime = styled.span<{overdue: boolean}>(({ theme, overdue }) => ({
+//   color: overdue ? theme.colors.red : theme.fg,
+//   userSelect: 'none',
+// }))
 
-const DueTimeIcon = styled(Icon)(() => ({
-  verticalAlign: 'middle',
-}))
+// const DueTimeIcon = styled(Icon)(() => ({
+//   verticalAlign: 'middle',
+// }))
 
-const DueTimeDetail = styled.span(() => ({
-  marginLeft: '5px',
-  verticalAlign: 'middle',
-  fontSize: '12px',
-}))
+// const DueTimeDetail = styled.span(() => ({
+//   marginLeft: '5px',
+//   verticalAlign: 'middle',
+//   fontSize: '12px',
+// }))
