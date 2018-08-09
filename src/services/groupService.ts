@@ -3,7 +3,7 @@ import { concatMap, map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
 import boardService from './boardService'
-import { addModel, IGroup, IGroupAttributes, ITask, ITaskAttributes, removeModel, updateModel } from '../models'
+import { addModel, IGroup, IGroupAttributes, ITaskAttributes, removeModel, reorderModel, updateModel, ITask, reorderModelBetweenList } from '../models'
 
 const initialGroups: IGroup[] = []
 
@@ -13,13 +13,13 @@ type AddGroupData = {boardId: number, title: string, color: string}
 
 type UpdateGroupData = {groupId: number, groupAttrs: Partial<IGroupAttributes>}
 
-type MoveGroupData = {groupId: number, fromIndex: number, toIndex: number}
+type MoveGroupData = {boardId: number, fromIndex: number, toIndex: number}
 
 type AddTaskData = {groupId: number, content: string, contentHtml: string, dueAt: number, tagIds: number[]}
 
 type UpdateTaskData = {taskId: number, taskAttrs: Partial<ITaskAttributes>}
 
-type MoveTaskData = {taskId: number, fromIndex: number, toIndex: number}
+type MoveTaskData = {fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number}
 
 export class GroupService {
 
@@ -64,6 +64,11 @@ export class GroupService {
       map((group) => (groups: IGroup[]) => updateModel(groups, group)),
     ).subscribe(this.update$)
 
+    this.moveGroup$.pipe(
+      concatMap(({ boardId, fromIndex, toIndex }) => store.moveGroup(boardId, fromIndex, toIndex)),
+      map(({ boardId, fromIndex, toIndex }) => (groups: IGroup[]) => reorderModel(groups, fromIndex, toIndex)),
+    ).subscribe(this.update$)
+
     this.removeGroup$.pipe(
       concatMap((groupId) => store.removeGroup(groupId)),
       map((groupId) => (groups: IGroup[]) => removeModel(groups, groupId)),
@@ -93,6 +98,14 @@ export class GroupService {
       )),
     )
 
+    this.moveTask$.pipe(
+      concatMap(({ fromGroupId, toGroupId, fromIndex, toIndex }) =>
+        store.moveTask(fromGroupId, toGroupId, fromIndex, toIndex)),
+      map(({ fromGroupId, toGroupId, fromIndex, toIndex }) => (groups: IGroup[]) => 
+        reorderModelBetweenList(groups, 'tasks', fromGroupId, toGroupId, fromIndex, toIndex),
+      ),
+    ).subscribe(this.update$)
+
     this.removeTask$.pipe(
       concatMap((taskId) => store.removeTask(taskId)),
       map(({ groupId, taskId }) => (groups: IGroup[]) => (
@@ -104,6 +117,14 @@ export class GroupService {
       )),
     )
 
+  }
+
+  public moveTask (taskId: number, fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number) {
+    this.moveTask$.next({taskId, fromGroupId, toGroupId, fromIndex, toIndex})
+  }
+
+  public moveGroup (groupId: number, fromIndex: number, toIndex: number) {
+    this.moveGroup$.next({ groupId, fromIndex, toIndex })
   }
 
   public addGroup (boardId: number, title: string, color: string) {

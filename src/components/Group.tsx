@@ -71,7 +71,7 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
   }
 
   public render () {
-    const { className, header, title, actions, children, footer } = this.props
+    const { className, header, title, actions, children, footer, ...others } = this.props
     const { height } = this.state
 
     return (
@@ -79,7 +79,9 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
         className={className}
         innerRef={this.refWrapper}
       >
-        <Header>
+        <Header
+          {...others}
+        >
           {header || (
             <React.Fragment>
               <Title>{title}</Title>

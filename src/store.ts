@@ -115,18 +115,17 @@ export class TodoronStore {
     })
   }
 
-  public async moveGroup (groupId: number, fromIndex: number, toIndex: number) {
+  public async moveGroup (boardId: number, fromIndex: number, toIndex: number) {
     return db.transaction('rw', db.boards, db.groups, async () => {
-      const group = await getGroup(groupId)
-      const board = await getBoard(group.boardId)
+      const board = await getBoard(boardId)
 
       const groupIds = board.groupIds
-      groupIds.splice(fromIndex, 1)
-      groupIds.splice(toIndex, 0, groupId)
+      const [removed] = groupIds.splice(fromIndex, 1)
+      groupIds.splice(toIndex, 0, removed)
 
-      await db.boards.update(group.boardId, { groupIds })
+      await db.boards.update(boardId, { groupIds })
 
-      return { groupId, fromIndex, toIndex }
+      return { boardId, fromIndex, toIndex }
     })
   }
 
@@ -181,18 +180,26 @@ export class TodoronStore {
     })
   }
 
-  public async moveTask (taskId: number, fromIndex: number, toIndex: number) {
+  public async moveTask (fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number) {
     return db.transaction('rw', db.groups, db.tasks, async () => {
-      const task = await getTask(taskId)
-      const group = await getGroup(task.groupId)
+      const fromGroup = await getGroup(fromGroupId)
+      const toGroup = await getGroup(toGroupId)
 
-      const taskIds = group.taskIds
-      taskIds.splice(fromIndex, 1)
-      taskIds.splice(toIndex, 0, taskId)
+      const fromTaskIds = fromGroup.taskIds
+      const toTaskIds = toGroup.taskIds
+      
+      const [removed] = fromTaskIds.splice(fromIndex, 1)
+      
+      if (fromGroupId === toGroupId) {
+        fromTaskIds.splice(toIndex, 0, removed)
+      } else {
+        toTaskIds.splice(toIndex, 0, removed)
+        await db.groups.update(toGroupId, { taskIds: toTaskIds })
+      }
 
-      await db.groups.update(task.groupId, { taskIds })
-
-      return { taskId, fromIndex, toIndex }
+      await db.groups.update(fromGroupId, { taskIds: fromTaskIds })
+      
+      return { fromGroupId, toGroupId, fromIndex, toIndex }
     })
   }
 
