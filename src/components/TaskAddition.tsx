@@ -7,7 +7,7 @@ import TagContext from './TagContext'
 import Textarea from './Textarea'
 import { ITag } from '../models'
 
-type ConfirmData = {
+export type ConfirmData = {
   groupId: number,
   content: string,
 }

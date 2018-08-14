@@ -6,10 +6,7 @@ import ScrollArea from './ScrollArea'
 export interface IGroupProps {
   className?: string
   header?: React.ReactNode
-  title?: React.ReactNode
-  actions?: React.ReactNode
   footer?: React.ReactNode
-  children?: React.ReactNode
 }
 
 export interface IGroupState {
@@ -61,6 +58,7 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
     const $footer = this.$wrapper.childNodes[2] as HTMLDivElement
 
     let { paddingTop, paddingBottom } = getComputedStyle($parent)
+
     const maxHeight = $parent.offsetHeight - $header.offsetHeight - ($footer ? $footer.offsetHeight : 0)
       - parseInt(paddingTop || '0') - parseInt(paddingBottom || '0')
     const height = this.refScrollArea.current!.$container.scrollHeight
@@ -71,7 +69,7 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
   }
 
   public render () {
-    const { className, header, title, actions, children, footer, ...others } = this.props
+    const { className, header, children, footer } = this.props
     const { height } = this.state
 
     return (
@@ -79,19 +77,12 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
         className={className}
         innerRef={this.refWrapper}
       >
-        <Header
-          {...others}
-        >
-          {header || (
-            <React.Fragment>
-              <Title>{title}</Title>
-              <Actions>{actions}</Actions>
-            </React.Fragment>
-          )}
-        </Header>
+        {header && (
+          <Header>{header}</Header>
+        )}
         <Container innerRef={this.refContainer}>
           <ScrollArea ref={this.refScrollArea} style={{ height }}>
-            <Inner>{children}</Inner>
+            {children}
           </ScrollArea>
         </Container>
         {footer && (
@@ -109,36 +100,16 @@ const Wrapper = styled.div(({ theme }) => ({
   flexDirection: 'column',
   width: '300px',
   maxHeight: '100%',
+  verticalAlign: 'top',
   background: theme.bg,
   boxShadow: theme.boxShadow,
 }))
 
-const Header = styled.div(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  minHeight: '40px',
-}))
-
-const Title = styled.div(({ theme }) => ({
-  marginLeft: '10px',
-  flex: 1,
-  color: theme.fg,
-  fontSize: '14px',
-}))
-
-const Actions = styled.div(() => ({
-  marginRight: '10px',
-}))
+const Header = styled.div()
 
 const Container = styled.div(() => ({
   flex: '1',
   minHeight: 0,
-}))
-
-const Inner = styled.div(() => ({
-  '&:not(:empty)': {
-    padding: '10px',
-  },
 }))
 
 const Footer = styled.div()

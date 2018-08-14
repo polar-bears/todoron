@@ -46,7 +46,7 @@ export function updateModel<T extends IBase> (list: T[], existedItem: T) {
   return list.map((item) => item.id === existedItem.id ? Object.assign({}, item, existedItem) : item)
 }
 
-export function reorderModel<T extends IBase> (list: T[],fromIndex: number,toIndex: number) {
+export function reorderModel<T extends IBase> (list: T[], fromIndex: number, toIndex: number) {
   list = [...list]
 
   const [removed] = list.splice(fromIndex, 1)

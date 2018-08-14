@@ -3,7 +3,16 @@ import { concatMap, map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
 import boardService from './boardService'
-import { addModel, IGroup, IGroupAttributes, ITaskAttributes, removeModel, reorderModel, updateModel, ITask, reorderModelBetweenList } from '../models'
+import {
+  addModel,
+  IGroup,
+  IGroupAttributes,
+  ITaskAttributes,
+  removeModel,
+  reorderModel,
+  reorderModelBetweenList,
+  updateModel,
+} from '../models'
 
 const initialGroups: IGroup[] = []
 
@@ -119,12 +128,12 @@ export class GroupService {
 
   }
 
-  public moveTask (taskId: number, fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number) {
-    this.moveTask$.next({taskId, fromGroupId, toGroupId, fromIndex, toIndex})
+  public moveTask (fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number) {
+    this.moveTask$.next({ fromGroupId, toGroupId, fromIndex, toIndex })
   }
 
-  public moveGroup (groupId: number, fromIndex: number, toIndex: number) {
-    this.moveGroup$.next({ groupId, fromIndex, toIndex })
+  public moveGroup (boardId: number, fromIndex: number, toIndex: number) {
+    this.moveGroup$.next({ boardId, fromIndex, toIndex })
   }
 
   public addGroup (boardId: number, title: string, color: string) {

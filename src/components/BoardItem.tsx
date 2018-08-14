@@ -69,7 +69,3 @@ const Content = styled.div(() => ({
   marginLeft: '8px',
   flex: 1,
 }))
-
-const Actions = styled.div(() => ({
-  marginLeft: '8px',
-}))

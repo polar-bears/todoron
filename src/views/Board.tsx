@@ -2,15 +2,13 @@ import * as React from 'react'
 import { RouteComponentProps } from 'react-router'
 import { Subscription } from 'rxjs'
 import { tag } from 'rxjs-spy/operators/tag'
-import { DragDropContext, Draggable, DraggableLocation, DragStart, Droppable, DropResult } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd'
 
-import Button from '../components/Button'
 import Group from '../components/Group'
 import GroupAddition from '../components/GroupAddition'
 import ScrollArea from '../components/ScrollArea'
 import TagContext from '../components/TagContext'
-import TaskAddition from '../components/TaskAddition'
-import TaskCard from '../components/TaskCard'
+import TaskGroup from '../components/TaskGroup'
 import boardService from '../services/boardService'
 import groupService from '../services/groupService'
 import styled from '../styles/theme'
@@ -27,7 +25,7 @@ export interface IBoardState {
 
 export default class Board extends React.Component<IBoardProps, IBoardState> {
 
-  public static getDerivedStateFromProps (nextProps: IBoardProps) {
+  public static getDerivedStateFromProps(nextProps: IBoardProps) {
     const boardId = Number(nextProps.match.params.boardId)
 
     // todo: selected an old id
@@ -49,7 +47,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
     tags: [],
   }
 
-  public componentDidMount () {
+  public componentDidMount() {
     this.board$ = boardService.board$
       .subscribe((board) => this.setState({ board }))
 
@@ -58,7 +56,8 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
       .subscribe((groups) => this.setState({ groups, loading: false }))
   }
 
-  public componentWillUnmount () {
+  public componentWillUnmount() {
+    this.board$.unsubscribe()
     this.groups$.unsubscribe()
   }
 
@@ -76,38 +75,30 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
     reset(fromShortcut)
   }
 
-  private reorder = (list: any[], startIndex: number, endIndex: number) => {
-    const result = Array.from(list)
-    const [removed] = result.splice(startIndex, 1)
-    result.splice(endIndex, 0, removed)
-  
-    return result
-  }
-
-  private onDragStart = (initial: DragStart) => { 
-    // todo: auto height
-  }
-
   private onDragEnd = (result: DropResult) => {
-    if (!result.destination) return
-
-    const source: DraggableLocation = result.source
-    const destination: DraggableLocation = result.destination
+    const { destination, source, type } = result
 
     if (
+      !destination ||
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) return
 
-    if (result.type === 'GROUP') {
-      groupService.moveGroup(+result.draggableId, source.index, destination.index)
-    } else if (result.type === 'TASK') {
-      groupService.moveTask(+result.draggableId, +source.droppableId,
-        +destination.droppableId, source.index, destination.index)
+    if (type === 'GROUPS') {
+      const boardId = this.state.board!.id
+      groupService.moveGroup(boardId, source.index, destination.index)
+    } else if (type === 'TASKS') {
+      groupService.moveTask(
+        Number(source.droppableId),
+        Number(destination.droppableId),
+        source.index,
+        destination.index,
+      )
     }
+
   }
 
-  public render () {
+  public render() {
     const { loading, groups } = this.state
 
     if (loading) {
@@ -118,123 +109,58 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
       <TagContext.Provider value={{ tags: [] }}>
         <Wrapper>
           <Header />
-            <DragDropContext
-              onDragStart={this.onDragStart}
-              onDragEnd={this.onDragEnd}
-            >
-            <ScrollArea direction='horizontal'>
-              <Droppable
-                droppableId='board'
-                type='GROUP'
-                direction='horizontal'
+          <ScrollArea direction='horizontal'>
+            <Container>
+              <DragDropContext
+                onDragEnd={this.onDragEnd}
               >
-              {(provided, snapshot) => (
-                  <Container
-                    innerRef={provided.innerRef}
-                    {...provided.droppableProps}
-                  >
-                    {
-                      groups.map((group, index) => (
-                        <Draggable
+                <Droppable
+                  droppableId='board'
+                  type='GROUPS'
+                  direction='horizontal'
+                >
+                  {(provided: DroppableProvided) => (
+                    <Inner innerRef={provided.innerRef} {...provided.droppableProps}>
+                      {groups.map((group, index) => (
+                        <TaskGroup
                           key={group.id}
-                          draggableId={group.id + ''}
+                          group={group}
                           index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                            >
-                              <Group
-                                {...provided.dragHandleProps}
-                                key={group.id}
-                                title={`${group.title} (${group.tasks.length})`}
-                                actions={(
-                                  <React.Fragment>
-                                    <Button size='small' icon='MoreVertical'/>
-                                  </React.Fragment>
-                                )}
-                                footer={(
-                                  <TaskAddition groupId={group.id} onConfirm={this.onAddTask}/>
-                                )}
-                              >
-                                <Droppable
-                                  droppableId={group.id + ''}
-                                  type='TASK'
-                                >
-                                  {(dropProvided, dropSnapshot) => (
-                                    <div
-                                      ref={dropProvided.innerRef}
-                                      {...dropProvided.droppableProps}
-                                    >
-                                      {group.tasks.map((task, index) => (
-                                        <Draggable
-                                          key={task.id}
-                                          index={index}
-                                          draggableId={task.id + ''}
-                                        >
-                                          {(dropProvided, dropSnapshot) => (
-                                            <TaskCardWrapper
-                                              isDragging={dropSnapshot.isDragging}
-                                              innerRef={dropProvided.innerRef}
-                                              {...dropProvided.draggableProps}
-                                              {...dropProvided.dragHandleProps}
-                                            >
-                                              <TaskCard key={task.id} task={task} />
-                                            </TaskCardWrapper>
-                                          )}
-                                        </Draggable>
-                                      ))}
-                                      {dropProvided.placeholder}
-                                    </div>
-                                  )}
-                                </Droppable>
-                              </Group>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))
-                    }
-                    <AdditionWrapper>
-                      <GroupAddition onConfirm={this.onAddGroup} />
-                    </AdditionWrapper>
-                  </Container>
-                )}
-              </Droppable>
-              </ScrollArea>
-            </DragDropContext>
+                          onAddTask={this.onAddTask}
+                        />
+                      ))}
+                    </Inner>
+                  )}
+                </Droppable>
+              </DragDropContext>
+              <Group header={<GroupAddition onConfirm={this.onAddGroup} />} />
+            </Container>
+          </ScrollArea>
         </Wrapper>
       </TagContext.Provider>
     )
   }
-
 }
 
 const Wrapper = styled.div(() => ({
   position: 'relative',
   height: '100%',
-}))
-
-const AdditionWrapper = styled.div(({ theme }) => ({
-  width: '300px',
-  height: '42px',
-  background: theme.bg,
-  boxShadow: theme.boxShadow,
+  padding: '0px',
 }))
 
 const Header = styled.div()
-const TaskCardWrapper = styled.div<{ isDragging: boolean }>(({ isDragging }) => ({
-  background: '#eee',
-  marginBottom: '10px',
-}))
 
 const Container = styled.div(() => ({
   padding: '20px 20px 50px',
   height: '100%',
-  display: 'flex',
+  verticalAlign: 'top',
   whiteSpace: 'nowrap',
 
   '& > div': {
     whiteSpace: 'normal',
   },
+}))
+
+const Inner = styled.div(() => ({
+  display: 'inline-flex',
 }))

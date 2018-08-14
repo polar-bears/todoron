@@ -53,7 +53,7 @@ export class TodoronStore {
   public async updateBoard (boardId: number, boardAttrs: Partial<IBoardAttributes>) {
     return db.transaction('rw', db.boards, async () => {
       await db.boards.update(boardId, boardAttrs)
-
+      
       return getBoard(boardId)
     })
   }

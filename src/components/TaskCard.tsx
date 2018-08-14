@@ -1,5 +1,6 @@
 import * as React from 'react'
 import createTimeAgo from 'timeago.js'
+import { Draggable, DraggableProvided, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd'
 
 import styled from '../styles/theme'
 import Card from './Card'
@@ -16,56 +17,76 @@ export interface ITaskCardContext {
 
 export interface ITaskCardProps {
   task: ITask
+  index: number
 }
 
-export interface ITaskCardState {}
+export interface ITaskCardState { }
 
 class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext, ITaskCardState> {
 
-  private get tags () {
+  private get tags() {
     const { tags, task } = this.props
 
     return tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
   }
 
-  public render () {
-    const { task } = this.props
+  public render() {
+    const { task, index, } = this.props
+
+    const { id } = task
+    const taskId = id.toString()
 
     return (
-      <Card>
-        <Header>
-          <Title>
-            <Checkbox/>
-            <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
-          </Title>
-          {this.tags.map((tag) => (
-            <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
-          ))}
-        </Header>
-        <Container>{task.content}</Container>
-        <Footer>
-          {/* <DueTime overdue>
-            <DueTimeIcon size='small' name='Clock'/>
-            <DueTimeDetail>
-              Today at 10:00 am
-            </DueTimeDetail>
-          </DueTime> */}
-        </Footer>
-      </Card>
+      <Draggable key={taskId} index={index} draggableId={taskId}>
+        {(dragProvided: DraggableProvided) => (
+          <Wrapper
+            draggableStyle={dragProvided.draggableProps.style || {}}
+            innerRef={dragProvided.innerRef}
+            {...dragProvided.draggableProps}
+            {...dragProvided.dragHandleProps}
+          >
+            <Card>
+              <Header>
+                <Title>
+                  <Checkbox />
+                  <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
+                </Title>
+                {this.tags.map((tag) => (
+                  <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
+                ))}
+              </Header>
+              <Container>{task.content}</Container>
+              <Footer>
+                {/* <DueTime overdue>
+                  <DueTimeIcon size='small' name='Clock'/>
+                  <DueTimeDetail>
+                    Today at 10:00 am
+                  </DueTimeDetail>
+                </DueTime> */}
+              </Footer>
+            </Card>
+          </Wrapper>
+        )}
+      </Draggable>
     )
   }
 
 }
 
-export default function TaskCard (props: ITaskCardProps) {
+export default function TaskCard(props: ITaskCardProps) {
   return (
     <TagContext.Consumer>
-        {(context) => (
-          <OriginalTaskCard {...context} {...props}/>
-        )}
-      </TagContext.Consumer>
+      {(context) => (
+        <OriginalTaskCard {...context} {...props} />
+      )}
+    </TagContext.Consumer>
   )
 }
+
+const Wrapper = styled.div<{ draggableStyle: DraggingStyle | NotDraggingStyle, }>(({ draggableStyle }) => ({
+  ...draggableStyle,
+  margin: '0 10px 10px 10px',
+}))
 
 const Header = styled.div(() => ({
   marginBottom: '8px',
