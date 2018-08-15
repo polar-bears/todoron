@@ -9,16 +9,15 @@ import GroupAddition from '../components/GroupAddition'
 import ScrollArea from '../components/ScrollArea'
 import TagContext from '../components/TagContext'
 import TaskGroup from '../components/TaskGroup'
-import boardService from '../services/boardService'
-import groupService from '../services/groupService'
 import styled from '../styles/theme'
 import { IBoard, IGroup, ITag } from '../models'
+import { boardViewService } from '../services'
 
 export interface IBoardProps extends RouteComponentProps<{ boardId: string }> { }
 
 export interface IBoardState {
   loading: boolean
-  board: IBoard | null
+  board?: IBoard
   groups: IGroup[]
   tags: ITag[]
 }
@@ -29,7 +28,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
     const boardId = Number(nextProps.match.params.boardId)
 
     // todo: selected an old id
-    boardService.selectBoard(boardId)
+    boardViewService.getBoard(boardId)
 
     return null
   }
@@ -41,17 +40,16 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
   // private tag$!: Subscription
 
   public state: IBoardState = {
-    board: null,
     loading: true,
     groups: [],
     tags: [],
   }
 
   public componentDidMount () {
-    this.board$ = boardService.board$
+    this.board$ = boardViewService.board$
       .subscribe((board) => this.setState({ board }))
 
-    this.groups$ = groupService.groups$
+    this.groups$ = boardViewService.groups$
       .pipe(tag('groups$'))
       .subscribe((groups) => this.setState({ groups, loading: false }))
   }
@@ -64,13 +62,13 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
   private onAddGroup = (title: string, reset: () => void) => {
     const boardId = this.state.board!.id
 
-    groupService.addGroup(boardId, title, '')
+    boardViewService.addGroup(boardId, title, '')
 
     reset()
   }
 
   private onAddTask = ({ groupId, content }: any, reset: (reopen: boolean) => void, fromShortcut: boolean) => {
-    groupService.addTask(groupId, content, '', -1, [])
+    boardViewService.addTask(groupId, content, '', -1, [])
 
     reset(fromShortcut)
   }
@@ -86,9 +84,9 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
     if (type === 'GROUPS') {
       const boardId = this.state.board!.id
-      groupService.moveGroup(boardId, source.index, destination.index)
+      boardViewService.moveGroup(boardId, source.index, destination.index)
     } else if (type === 'TASKS') {
-      groupService.moveTask(
+      boardViewService.moveTask(
         Number(source.droppableId),
         Number(destination.droppableId),
         source.index,

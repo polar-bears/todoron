@@ -1,5 +1,5 @@
 import { Observable, Subject } from 'rxjs'
-import { combineLatest, concatMap, distinctUntilChanged, map, scan, shareReplay, switchMap } from 'rxjs/operators'
+import { concatMap, map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
 import { addModel, IBoard, IBoardAttributes, removeModel, updateModel } from '../models'
@@ -8,61 +8,51 @@ const initialBoards: IBoard[] = []
 
 type BoardsGetter = (boards: IBoard[]) => IBoard[]
 
-type AddBoardData = {boardId: number, boardAttrs: Partial<IBoardAttributes>}
+type UpdateBoardData = {boardId: number, boardAttrs: Partial<IBoardAttributes>}
 
-export class BoardService {
-  
-  public boards$!: Observable<IBoard[]>
-  
-  public board$!: Observable<IBoard>
+export default class HomeViewService {
 
-  private update$: Subject<BoardsGetter> = new Subject()
+  private action$: Subject<BoardsGetter> = new Subject()
 
-  private select$: Subject<number> = new Subject()
+  public boards$: Observable<IBoard[]>
 
-  public loadBoards$: Subject<void> = new Subject()
+  public listBoards$: Subject<void> = new Subject()
 
   public addBoard$: Subject<string> = new Subject()
 
-  public updateBoard$: Subject<AddBoardData> = new Subject()
+  public updateBoard$: Subject<UpdateBoardData> = new Subject()
 
   public removeBoard$: Subject<number> = new Subject()
 
   public constructor () {
-    this.boards$ = this.update$.pipe(
+    this.boards$ = this.action$.pipe(
       scan<BoardsGetter, IBoard[]>((boards, operation) => operation(boards), initialBoards),
       shareReplay(1),
     )
 
-    this.board$ = this.select$.pipe(
-      distinctUntilChanged(),
-      combineLatest(this.boards$, (boardId, boards) => boards.find((b) => b.id === boardId)!),
-      shareReplay(1),
-    )
-
-    this.loadBoards$.pipe(
+    this.listBoards$.pipe(
       switchMap(() => store.listBoards()),
       map((boards) => () => boards),
-    ).subscribe(this.update$)
+    ).subscribe(this.action$)
 
     this.addBoard$.pipe(
       concatMap((title) => store.addBoard(title)),
       map((board) => (boards: IBoard[]) => addModel(boards, board, true)),
-    ).subscribe(this.update$)
+    ).subscribe(this.action$)
 
     this.updateBoard$.pipe(
       concatMap(({ boardId, boardAttrs }) => store.updateBoard(boardId, boardAttrs)),
       map((board) => (boards: IBoard[]) => updateModel(boards, board)),
-    ).subscribe(this.update$)
+    ).subscribe(this.action$)
 
     this.removeBoard$.pipe(
       concatMap((boardId) => store.removeBoard(boardId)),
       map((boardId) => (boards: IBoard[]) => removeModel(boards, boardId)),
-    ).subscribe(this.update$)
+    ).subscribe(this.action$)
   }
 
-  public loadBoards () {
-    this.loadBoards$.next()
+  public listBoards () {
+    this.listBoards$.next()
   }
 
   public addBoard (title: string) {
@@ -77,11 +67,4 @@ export class BoardService {
     this.removeBoard$.next(id)
   }
 
-  public selectBoard (id: number) {
-    this.select$.next(id)
-  }
 }
-
-const boardService  = new BoardService()
-
-export default boardService

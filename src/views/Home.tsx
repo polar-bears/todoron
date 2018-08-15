@@ -10,10 +10,10 @@ import Input from '../components/Input'
 import Logo from '../components/Logo'
 import SidePanel from '../components/SidePanel'
 import TopBar from '../components/TopBar'
-import boardService from '../services/boardService'
 import styled from '../styles/theme'
 import Board from './Board'
 import { IBoard } from '../models'
+import { boardViewService, homeViewService } from '../services'
 
 export interface IHomeProps extends RouteComponentProps<{}> {}
 
@@ -23,7 +23,7 @@ export interface IHomeState {
   adding: boolean
   addingTitle: string
   boards: IBoard[]
-  board: IBoard | null
+  board?: IBoard
 }
 
 export default class Home extends React.Component<IHomeProps, IHomeState> {
@@ -40,19 +40,18 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
     adding: false,
     addingTitle: '',
     boards: [],
-    board: null,
   }
 
   public componentDidMount () {
-    this.boards$ = boardService.boards$
+    this.boards$ = homeViewService.boards$
       .pipe(tag('boards$'))
       .subscribe((boards) => this.setState({ boards, loading: false }))
 
-    this.board$ = boardService.board$
+    this.board$ = boardViewService.board$
       .pipe(tag('board$'))
       .subscribe((board) => this.setState({ board }))
 
-    boardService.loadBoards()
+    homeViewService.listBoards()
   }
 
   public componentWillUnmount () {
@@ -82,7 +81,7 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   private onAddingConfirm = async () => {
     const title = this.state.addingTitle.trim()
 
-    await boardService.addBoard(title)
+    await homeViewService.addBoard(title)
     this.setState({ adding: false, addingTitle: '' })
   }
 
