@@ -25,7 +25,7 @@ export interface IBoardState {
 
 export default class Board extends React.Component<IBoardProps, IBoardState> {
 
-  public static getDerivedStateFromProps(nextProps: IBoardProps) {
+  public static getDerivedStateFromProps (nextProps: IBoardProps) {
     const boardId = Number(nextProps.match.params.boardId)
 
     // todo: selected an old id
@@ -38,7 +38,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
   private groups$!: Subscription
 
-  private tag$!: Subscription
+  // private tag$!: Subscription
 
   public state: IBoardState = {
     board: null,
@@ -47,7 +47,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
     tags: [],
   }
 
-  public componentDidMount() {
+  public componentDidMount () {
     this.board$ = boardService.board$
       .subscribe((board) => this.setState({ board }))
 
@@ -56,7 +56,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
       .subscribe((groups) => this.setState({ groups, loading: false }))
   }
 
-  public componentWillUnmount() {
+  public componentWillUnmount () {
     this.board$.unsubscribe()
     this.groups$.unsubscribe()
   }
@@ -98,7 +98,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
   }
 
-  public render() {
+  public render () {
     const { loading, groups } = this.state
 
     if (loading) {

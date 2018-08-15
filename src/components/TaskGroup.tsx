@@ -29,7 +29,7 @@ export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGro
     )
   }
 
-  public render() {
+  public render () {
     const { group, index, onAddTask } = this.props
 
     const { id, title, tasks } = group

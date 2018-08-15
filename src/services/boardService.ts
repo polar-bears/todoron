@@ -36,7 +36,7 @@ export class BoardService {
 
     this.board$ = this.select$.pipe(
       distinctUntilChanged(),
-      combineLatest(this.boards$, (boardId, boards) => boards.find((b) => b.id === boardId)),
+      combineLatest(this.boards$, (boardId, boards) => boards.find((b) => b.id === boardId)!),
       shareReplay(1),
     )
 

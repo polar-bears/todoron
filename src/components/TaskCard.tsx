@@ -24,13 +24,13 @@ export interface ITaskCardState { }
 
 class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext, ITaskCardState> {
 
-  private get tags() {
+  private get tags () {
     const { tags, task } = this.props
 
     return tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
   }
 
-  public render() {
+  public render () {
     const { task, index, } = this.props
 
     const { id } = task
@@ -73,7 +73,7 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
 
 }
 
-export default function TaskCard(props: ITaskCardProps) {
+export default function TaskCard (props: ITaskCardProps) {
   return (
     <TagContext.Consumer>
       {(context) => (

@@ -55,7 +55,7 @@ export function reorderModel<T extends IBase> (list: T[], fromIndex: number, toI
   return list
 }
 
-export function reorderModelBetweenList<T extends IBase>(
+export function reorderModelBetweenList<T extends IBase> (
   list: T[],
   prop: string,
   fromId: number,
