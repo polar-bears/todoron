@@ -1,70 +1,80 @@
 import { Observable, Subject } from 'rxjs'
-import { concatMap, map, scan, shareReplay, switchMap } from 'rxjs/operators'
+import { concatMap, scan, share, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
-import { addModel, IBoard, IBoardAttributes, removeModel, updateModel } from '../models'
+import { IAction, ofType } from '../libs/action'
+import {
+  ADD_BOARD,
+  AddBoardAction,
+  LIST_BOARDS,
+  ListBoardsAction,
+  REMOVE_BOARD,
+  RemoveBoardAction,
+  UPDATE_BOARD,
+  UpdateBoardAction,
+} from './actions'
+import { IBoard } from '../models'
+import { addOne, removeById, renew } from './adapter'
+
+type BoardsUpdater = (boards: IBoard[]) => IBoard[]
 
 const initialBoards: IBoard[] = []
 
-type BoardsGetter = (boards: IBoard[]) => IBoard[]
-
-type UpdateBoardData = {boardId: number, boardAttrs: Partial<IBoardAttributes>}
-
 export default class HomeViewService {
 
-  private action$: Subject<BoardsGetter> = new Subject()
+  public action$: Subject<IAction> = new Subject()
 
-  public boards$: Observable<IBoard[]>
+  public updater$: Subject<BoardsUpdater> = new Subject()
 
-  public listBoards$: Subject<void> = new Subject()
+  public boards$: Observable<IBoard[]> = this.updater$.pipe(
+    scan<BoardsUpdater, IBoard[]>((boards, operation) => operation(boards), initialBoards),
+    shareReplay(1),
+  )
 
-  public addBoard$: Subject<string> = new Subject()
+  public listBoards$: Observable<IBoard[]> = this.action$.pipe(
+    ofType<ListBoardsAction>(LIST_BOARDS),
+    switchMap(() => store.listBoards()),
+    share(),
+  )
 
-  public updateBoard$: Subject<UpdateBoardData> = new Subject()
+  public addBoard$: Observable<IBoard> = this.action$.pipe(
+    ofType<AddBoardAction>(ADD_BOARD),
+    concatMap(({ payload: { title } }) => store.addBoard(title)),
+    share(),
+  )
 
-  public removeBoard$: Subject<number> = new Subject()
+  public updateBoard$: Observable<IBoard> = this.action$.pipe(
+    ofType<UpdateBoardAction>(UPDATE_BOARD),
+    concatMap(({ payload: { boardId, boardAttrs } }) => store.updateBoard(boardId, boardAttrs)),
+    share(),
+  )
+
+  public removeBoard$: Observable<number> = this.action$.pipe(
+    ofType<RemoveBoardAction>(REMOVE_BOARD),
+    concatMap(({ payload: { boardId } }) => store.removeBoard(boardId)),
+    share(),
+  )
 
   public constructor () {
-    this.boards$ = this.action$.pipe(
-      scan<BoardsGetter, IBoard[]>((boards, operation) => operation(boards), initialBoards),
-      shareReplay(1),
-    )
+    this.listBoards$.subscribe((boards) => {
+      this.updater$.next(() => boards)
+    })
 
-    this.listBoards$.pipe(
-      switchMap(() => store.listBoards()),
-      map((boards) => () => boards),
-    ).subscribe(this.action$)
+    this.addBoard$.subscribe((board) => {
+      this.updater$.next((boards: IBoard[]) => addOne(boards, board, true))
+    })
 
-    this.addBoard$.pipe(
-      concatMap((title) => store.addBoard(title)),
-      map((board) => (boards: IBoard[]) => addModel(boards, board, true)),
-    ).subscribe(this.action$)
+    this.updateBoard$.subscribe((board) => {
+      this.updater$.next((boards: IBoard[]) => renew(boards, board))
+    })
 
-    this.updateBoard$.pipe(
-      concatMap(({ boardId, boardAttrs }) => store.updateBoard(boardId, boardAttrs)),
-      map((board) => (boards: IBoard[]) => updateModel(boards, board)),
-    ).subscribe(this.action$)
-
-    this.removeBoard$.pipe(
-      concatMap((boardId) => store.removeBoard(boardId)),
-      map((boardId) => (boards: IBoard[]) => removeModel(boards, boardId)),
-    ).subscribe(this.action$)
+    this.removeBoard$.subscribe((boardId) => {
+      this.updater$.next((boards: IBoard[]) => removeById(boards, boardId))
+    })
   }
 
-  public listBoards () {
-    this.listBoards$.next()
-  }
-
-  public addBoard (title: string) {
-    this.addBoard$.next(title)
-  }
-
-  public updateBoard (boardId: number, boardAttrs: Partial<IBoardAttributes>) {
-    this.updateBoard$.next({ boardId, boardAttrs })
-  }
-
-  public removeBoard (id: number) {
-    this.removeBoard$.next(id)
+  public dispatch (action: IAction) {
+    this.action$.next(action)
   }
 
 }

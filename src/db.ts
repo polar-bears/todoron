@@ -21,7 +21,7 @@ export class TodoronDB extends Dexie {
       tasks: '++id, boardId, groupId, content, contentHtml, finished, finishedAt, DueAt, tagIds',
       tags: '++id, boardId, title, color',
     })
-    
+
   }
 
 }

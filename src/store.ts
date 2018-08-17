@@ -1,5 +1,5 @@
 import db from './db'
-import { createModel, IBoardAttributes, IGroupAttributes, ITaskAttributes, toMap } from './models'
+import { IBase, IBoardAttributes, IGroupAttributes, ITaskAttributes } from './models'
 
 async function getBoard (boardId: number) {
   const board = await db.boards.get(boardId)
@@ -22,6 +22,20 @@ async function getTask (taskId: number) {
   return task
 }
 
+function create<T> (attributes: any): T {
+  return { ...attributes, createdAt: Date.now() }
+}
+
+function toMap<T extends IBase> (list: T[]) {
+  const map: {[key: number]: T} = {}
+
+  return list.reduce((m, item) => {
+    m[item.id] = item
+
+    return m
+  }, map)
+}
+
 export class TodoronStore {
 
   public async listBoards () {
@@ -41,7 +55,7 @@ export class TodoronStore {
   public async addBoard (title: string) {
     return db.transaction('rw', db.boards, async () => {
       const boardAttrs = { title, groupIds: [], archived: false, archivedAt: -1 }
-      const boardId = await db.boards.add(createModel(boardAttrs))
+      const boardId = await db.boards.add(create(boardAttrs))
 
       const board = await getBoard(boardId)
       board.groups = []
@@ -53,7 +67,7 @@ export class TodoronStore {
   public async updateBoard (boardId: number, boardAttrs: Partial<IBoardAttributes>) {
     return db.transaction('rw', db.boards, async () => {
       await db.boards.update(boardId, boardAttrs)
-      
+
       return getBoard(boardId)
     })
   }
@@ -97,7 +111,7 @@ export class TodoronStore {
       const board = await getBoard(boardId)
 
       const groupAttrs = { boardId, title, color: '', taskIds: [] }
-      const groupId = await db.groups.add(createModel(groupAttrs))
+      const groupId = await db.groups.add(create(groupAttrs))
       await db.boards.update(boardId, { groupIds: [...board.groupIds, groupId] })
 
       const group = await getGroup(groupId)
@@ -165,7 +179,7 @@ export class TodoronStore {
         finishedAt: -1,
       }
 
-      const taskId = await db.tasks.add(createModel(taskAttrs))
+      const taskId = await db.tasks.add(create(taskAttrs))
       await db.groups.update(groupId, { taskIds: [...group.taskIds, taskId] })
 
       return getTask(taskId)
@@ -187,9 +201,9 @@ export class TodoronStore {
 
       const fromTaskIds = fromGroup.taskIds
       const toTaskIds = toGroup.taskIds
-      
+
       const [removed] = fromTaskIds.splice(fromIndex, 1)
-      
+
       if (fromGroupId === toGroupId) {
         fromTaskIds.splice(toIndex, 0, removed)
       } else {
@@ -198,7 +212,7 @@ export class TodoronStore {
       }
 
       await db.groups.update(fromGroupId, { taskIds: fromTaskIds })
-      
+
       return { fromGroupId, toGroupId, fromIndex, toIndex }
     })
   }
@@ -208,12 +222,12 @@ export class TodoronStore {
       const task = await getTask(taskId)
       const group = await getGroup(task.groupId)
       const groupId = group.id
-  
+
       const taskIds = group.taskIds.filter((id) => id !== taskId)
-  
+
       await db.groups.update(task.groupId, { taskIds })
       await db.tasks.delete(taskId)
-  
+
       return { groupId, taskId }
     })
   }

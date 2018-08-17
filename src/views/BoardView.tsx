@@ -12,26 +12,18 @@ import TaskGroup from '../components/TaskGroup'
 import styled from '../styles/theme'
 import { IBoard, IGroup, ITag } from '../models'
 import { boardViewService } from '../services'
+import { AddGroupAction, AddTaskAction, MoveGroupAction, MoveTaskAction } from '../services/actions'
 
-export interface IBoardProps extends RouteComponentProps<{ boardId: string }> { }
+export interface IProps extends RouteComponentProps<{ boardId: string }> { }
 
-export interface IBoardState {
+export interface IState {
   loading: boolean
   board?: IBoard
   groups: IGroup[]
   tags: ITag[]
 }
 
-export default class Board extends React.Component<IBoardProps, IBoardState> {
-
-  public static getDerivedStateFromProps (nextProps: IBoardProps) {
-    const boardId = Number(nextProps.match.params.boardId)
-
-    // todo: selected an old id
-    boardViewService.getBoard(boardId)
-
-    return null
-  }
+export default class BoardView extends React.Component<IProps, IState> {
 
   private board$!: Subscription
 
@@ -39,7 +31,7 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
   // private tag$!: Subscription
 
-  public state: IBoardState = {
+  public state: IState = {
     loading: true,
     groups: [],
     tags: [],
@@ -47,11 +39,29 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
   public componentDidMount () {
     this.board$ = boardViewService.board$
-      .subscribe((board) => this.setState({ board }))
+      .subscribe((board) => {
+        if (board) {
+          this.setState({ board })
+        } else {
+          this.props.history.push('/')
+        }
+      })
 
     this.groups$ = boardViewService.groups$
       .pipe(tag('groups$'))
       .subscribe((groups) => this.setState({ groups, loading: false }))
+
+    const boardId = Number(this.props.match.params.boardId)
+    boardViewService.selectBoard$.next(boardId)
+  }
+
+  public componentDidUpdate (prevProps: IProps, prevState: IState) {
+    const boardId = Number(this.props.match.params.boardId)
+    const prevBoardId = Number(prevProps.match.params.boardId)
+
+    if (boardId !== prevBoardId) {
+      boardViewService.selectBoard$.next(boardId)
+    }
   }
 
   public componentWillUnmount () {
@@ -62,13 +72,15 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
   private onAddGroup = (title: string, reset: () => void) => {
     const boardId = this.state.board!.id
 
-    boardViewService.addGroup(boardId, title, '')
+    boardViewService.dispatch(new AddGroupAction({ boardId, title, color: '' }))
 
     reset()
   }
 
   private onAddTask = ({ groupId, content }: any, reset: (reopen: boolean) => void, fromShortcut: boolean) => {
-    boardViewService.addTask(groupId, content, '', -1, [])
+    boardViewService.dispatch(
+      new AddTaskAction({ groupId, content, contentHtml: '', dueAt: -1, tagIds: [] }),
+    )
 
     reset(fromShortcut)
   }
@@ -84,16 +96,23 @@ export default class Board extends React.Component<IBoardProps, IBoardState> {
 
     if (type === 'GROUPS') {
       const boardId = this.state.board!.id
-      boardViewService.moveGroup(boardId, source.index, destination.index)
+      boardViewService.dispatch(
+        new MoveGroupAction({
+          boardId,
+          fromIndex: source.index,
+          toIndex: destination.index,
+        }),
+      )
     } else if (type === 'TASKS') {
-      boardViewService.moveTask(
-        Number(source.droppableId),
-        Number(destination.droppableId),
-        source.index,
-        destination.index,
+      boardViewService.dispatch(
+        new MoveTaskAction({
+          fromGroupId: Number(source.droppableId),
+          toGroupId: Number(destination.droppableId),
+          fromIndex: source.index,
+          toIndex: destination.index,
+        }),
       )
     }
-
   }
 
   public render () {

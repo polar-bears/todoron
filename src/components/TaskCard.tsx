@@ -34,7 +34,7 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
     const { task, index, } = this.props
 
     const { id } = task
-    const taskId = id.toString()
+    const taskId = 'task' + id
 
     return (
       <Draggable key={taskId} index={index} draggableId={taskId}>

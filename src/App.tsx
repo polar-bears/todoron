@@ -2,7 +2,7 @@ import * as React from 'react'
 import { HashRouter as Router, Route } from 'react-router-dom'
 import { ThemeProvider } from 'emotion-theming'
 
-import Home from './views/Home'
+import HomeView from './views/HomeView'
 import { lightTheme } from './styles/theme'
 
 export interface IAppProps {}
@@ -15,7 +15,7 @@ export default class App extends React.Component<IAppProps, IAppState> {
     return (
       <ThemeProvider theme={lightTheme}>
         <Router>
-          <Route path='/' component={Home}/>
+          <Route path='/' component={HomeView}/>
         </Router>
       </ThemeProvider>
     )

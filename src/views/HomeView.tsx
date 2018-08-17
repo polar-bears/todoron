@@ -11,13 +11,14 @@ import Logo from '../components/Logo'
 import SidePanel from '../components/SidePanel'
 import TopBar from '../components/TopBar'
 import styled from '../styles/theme'
-import Board from './Board'
+import BoardView from './BoardView'
 import { IBoard } from '../models'
 import { boardViewService, homeViewService } from '../services'
+import { AddBoardAction, ListBoardsAction } from '../services/actions'
 
-export interface IHomeProps extends RouteComponentProps<{}> {}
+export interface IProps extends RouteComponentProps<{}> {}
 
-export interface IHomeState {
+export interface IState {
   loading: boolean
   expanded: boolean
   adding: boolean
@@ -26,15 +27,17 @@ export interface IHomeState {
   board?: IBoard
 }
 
-export default class Home extends React.Component<IHomeProps, IHomeState> {
+export default class HomeView extends React.Component<IProps, IState> {
 
   private refAddingInput = React.createRef<Input>()
 
-  private boards$!: Subscription
+  private boards$$!: Subscription
 
-  private board$!: Subscription
+  private board$$!: Subscription
 
-  public state: IHomeState = {
+  private addBoard$$!: Subscription
+
+  public state: IState = {
     loading: true,
     expanded: false,
     adding: false,
@@ -43,20 +46,24 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   }
 
   public componentDidMount () {
-    this.boards$ = homeViewService.boards$
+    this.boards$$ = homeViewService.boards$
       .pipe(tag('boards$'))
       .subscribe((boards) => this.setState({ boards, loading: false }))
 
-    this.board$ = boardViewService.board$
+    this.board$$ = boardViewService.board$
       .pipe(tag('board$'))
       .subscribe((board) => this.setState({ board }))
 
-    homeViewService.listBoards()
+    this.addBoard$$ = homeViewService.addBoard$
+      .subscribe((board) => this.props.history.push(`/boards/${board.id}`))
+
+    homeViewService.dispatch(new ListBoardsAction())
   }
 
   public componentWillUnmount () {
-    this.boards$.unsubscribe()
-    this.board$.unsubscribe()
+    this.boards$$.unsubscribe()
+    this.board$$.unsubscribe()
+    this.addBoard$$.unsubscribe()
   }
 
   private onToggleSidePanel = () => {
@@ -66,7 +73,7 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
   private onToggleAdding = () => {
     const visible = !this.state.adding
     const $input = this.refAddingInput.current
-    
+
     this.setState({ adding: visible, addingTitle: '' })
 
     if (visible && $input) {
@@ -78,10 +85,10 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
     this.setState({ addingTitle: value })
   }
 
-  private onAddingConfirm = async () => {
+  private onAddingConfirm = () => {
     const title = this.state.addingTitle.trim()
 
-    await homeViewService.addBoard(title)
+    homeViewService.dispatch(new AddBoardAction({ title }))
     this.setState({ adding: false, addingTitle: '' })
   }
 
@@ -154,7 +161,7 @@ export default class Home extends React.Component<IHomeProps, IHomeState> {
             ))}
           </SidePanel>
           <Switch>
-            <Route path='/boards/:boardId' component={Board}/>
+            <Route path='/boards/:boardId' component={BoardView}/>
             <Redirect to={`/boards/${boards[0].id}`}/>
           </Switch>
         </Container>

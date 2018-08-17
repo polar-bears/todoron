@@ -1,63 +1,103 @@
 import { Observable, Subject } from 'rxjs'
-import { combineLatest, concatMap, distinctUntilChanged, map, scan, shareReplay, switchMap } from 'rxjs/operators'
+import { combineLatest, concatMap, distinctUntilChanged, scan, share, shareReplay, switchMap } from 'rxjs/operators'
 
 import store from '../store'
+import { IBoard, IGroup, ITask } from '../models'
+import { IAction, ofType } from '../libs/action'
 import {
-  addModel,
-  IBoard,
-  IGroup,
-  IGroupAttributes,
-  ITaskAttributes,
-  removeModel,
-  reorderModel,
-  reorderModelBetweenList,
-  updateModel,
-} from '../models'
+  ADD_GROUP,
+  ADD_TASK,
+  AddGroupAction,
+  AddTaskAction,
+  MOVE_GROUP,
+  MOVE_TASK,
+  MoveGroupAction,
+  MoveGroupPayload,
+  MoveTaskAction,
+  MoveTaskPayload,
+  REMOVE_GROUP,
+  REMOVE_TASK,
+  RemoveGroupAction,
+  RemoveTaskAction,
+  UPDATE_GROUP,
+  UPDATE_TASK,
+  UpdateGroupAction,
+  UpdateTaskAction,
+} from './actions'
+import { addOne, removeById, renew, reorder, reorderBetween } from './adapter'
+
+type GroupsUpdater = (groups: IGroup[]) => IGroup[]
 
 const initialGroups: IGroup[] = []
 
-type GroupsGetter = (groups: IGroup[]) => IGroup[]
-
-type AddGroupData = {boardId: number, title: string, color: string}
-
-type UpdateGroupData = {groupId: number, groupAttrs: Partial<IGroupAttributes>}
-
-type MoveGroupData = {boardId: number, fromIndex: number, toIndex: number}
-
-type AddTaskData = {groupId: number, content: string, contentHtml: string, dueAt: number, tagIds: number[]}
-
-type UpdateTaskData = {taskId: number, taskAttrs: Partial<ITaskAttributes>}
-
-type MoveTaskData = {fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number}
-
 export default class BoardViewService {
 
-  private action$: Subject<GroupsGetter> = new Subject()
+  public action$: Subject<IAction> = new Subject()
+
+  public updater$: Subject<GroupsUpdater> = new Subject()
 
   public board$: Observable<IBoard | undefined>
 
-  public groups$: Observable<IGroup[]>
+  public selectBoard$: Subject<number> = new Subject()
 
-  public getBoard$: Subject<number> = new Subject()
+  public groups$ = this.updater$.pipe(
+    scan<GroupsUpdater, IGroup[]>((groups, operation) => operation(groups), initialGroups),
+    shareReplay(1),
+  )
 
-  public addGroup$: Subject<AddGroupData> = new Subject()
+  public addGroup$: Observable<IGroup> = this.action$.pipe(
+    ofType<AddGroupAction>(ADD_GROUP),
+    concatMap(({ payload: { boardId, title } }) => store.addGroup(boardId, title)),
+    share(),
+  )
 
-  public updateGroup$: Subject<UpdateGroupData> = new Subject()
+  public updateGroup$: Observable<IGroup> = this.action$.pipe(
+    ofType<UpdateGroupAction>(UPDATE_GROUP),
+    concatMap(({ payload: { groupId, groupAttrs } }) => store.updateGroup(groupId, groupAttrs)),
+    share(),
+  )
 
-  public moveGroup$: Subject<MoveGroupData> = new Subject()
+  public moveGroup$: Observable<MoveGroupPayload> = this.action$.pipe(
+    ofType<MoveGroupAction>(MOVE_GROUP),
+    concatMap(({ payload: { boardId, fromIndex, toIndex } }) => store.moveGroup(boardId, fromIndex, toIndex)),
+    share(),
+  )
 
-  public removeGroup$: Subject<number> = new Subject()
+  public removeGroup$: Observable<number> = this.action$.pipe(
+    ofType<RemoveGroupAction>(REMOVE_GROUP),
+    concatMap(({ payload: { groupId } }) => store.removeGroup(groupId)),
+    share(),
+  )
 
-  public addTask$: Subject<AddTaskData> = new Subject()
+  public addTask$: Observable<ITask> = this.action$.pipe(
+    ofType<AddTaskAction>(ADD_TASK),
+    concatMap(({ payload: { groupId, content, contentHtml, dueAt, tagIds } }) => (
+      store.addTask(groupId, content, contentHtml, dueAt, tagIds)
+    )),
+    share(),
+  )
 
-  public updateTask$: Subject<UpdateTaskData> = new Subject()
+  public updateTask$: Observable<ITask> = this.action$.pipe(
+    ofType<UpdateTaskAction>(UPDATE_TASK),
+    concatMap(({ payload: { taskId, taskAttrs } }) => store.updateTask(taskId, taskAttrs)),
+    share(),
+  )
 
-  public moveTask$: Subject<MoveTaskData> = new Subject()
+  public moveTask$: Observable<MoveTaskPayload> = this.action$.pipe(
+    ofType<MoveTaskAction>(MOVE_TASK),
+    concatMap(({ payload: { fromGroupId, toGroupId, fromIndex, toIndex } }) =>
+      store.moveTask(fromGroupId, toGroupId, fromIndex, toIndex)),
+    share(),
+  )
 
-  public removeTask$: Subject<number> = new Subject()
+  public removeTask$: Observable<{groupId: number, taskId: number}> = this.action$.pipe(
+    ofType<RemoveTaskAction>(REMOVE_TASK),
+    concatMap(({ payload: { taskId } }) => store.removeTask(taskId)),
+    share(),
+  )
 
   public constructor (boards$: Observable<IBoard[]>) {
-    this.board$ = this.getBoard$.pipe(
+    this.board$ = this.selectBoard$.pipe(
       distinctUntilChanged(),
       combineLatest(boards$, (boardId, boards) => boards.find((b) => b.id === boardId)),
       shareReplay(1),
@@ -65,95 +105,66 @@ export default class BoardViewService {
 
     this.board$.pipe(
       switchMap((board) => board ? store.listGroups(board.id) : []),
-      map((groups) => () => groups),
-    ).subscribe(this.action$)
+      share(),
+    ).subscribe((groups) => {
+      this.updater$.next(() => groups)
+    })
 
-    this.groups$ = this.action$.pipe(
-      scan<GroupsGetter, IGroup[]>((groups, operation) => operation(groups), initialGroups),
-      shareReplay(1),
-    )
+    this.addGroup$.subscribe((group) => {
+      this.updater$.next((groups: IGroup[]) => addOne(groups, group))
+    })
 
-    this.addGroup$.pipe(
-      concatMap(({ boardId, title }) => store.addGroup(boardId, title)),
-      map((group) => (groups: IGroup[]) => addModel(groups, group)),
-    ).subscribe(this.action$)
+    this.updateGroup$.subscribe((group) => {
+      this.updater$.next((groups: IGroup[]) => renew(groups, group))
+    })
 
-    this.updateGroup$.pipe(
-      concatMap(({ groupId, groupAttrs }) => store.updateGroup(groupId, groupAttrs)),
-      map((group) => (groups: IGroup[]) => updateModel(groups, group)),
-    ).subscribe(this.action$)
+    this.moveGroup$.subscribe(({ boardId, fromIndex, toIndex }) => {
+      this.updater$.next((groups: IGroup[]) => reorder(groups, fromIndex, toIndex))
+    })
 
-    this.moveGroup$.pipe(
-      concatMap(({ boardId, fromIndex, toIndex }) => store.moveGroup(boardId, fromIndex, toIndex)),
-      map(({ boardId, fromIndex, toIndex }) => (groups: IGroup[]) => reorderModel(groups, fromIndex, toIndex)),
-    ).subscribe(this.action$)
+    this.removeGroup$.subscribe((groupId) => {
+      this.updater$.next((groups: IGroup[]) => removeById(groups, groupId))
+    })
 
-    this.removeGroup$.pipe(
-      concatMap((groupId) => store.removeGroup(groupId)),
-      map((groupId) => (groups: IGroup[]) => removeModel(groups, groupId)),
-    ).subscribe(this.action$)
-
-    this.addTask$.pipe(
-      concatMap(({ groupId, content, contentHtml, dueAt, tagIds }) => (
-        store.addTask(groupId, content, contentHtml, dueAt, tagIds)
-      )),
-      map((task) => (groups: IGroup[]) => (
+    this.addTask$.subscribe((task) => {
+      this.updater$.next((groups: IGroup[]) => (
         groups.map((group) => {
           return group.id === task.groupId
-            ? { ...group, tasks: addModel(group.tasks, task) }
+            ? { ...group, tasks: addOne(group.tasks, task) }
             : group
         })
-      )),
-    ).subscribe(this.action$)
+      ))
+    })
 
-    this.updateTask$.pipe(
-      concatMap(({ taskId, taskAttrs }) => store.updateTask(taskId, taskAttrs)),
-      map((task) => (groups: IGroup[]) => (
+    this.updateTask$.subscribe((task) => {
+      this.updater$.next((groups: IGroup[]) => (
         groups.map((group) => {
           return group.id === task.groupId
-            ? { ...group, tasks: updateModel(group.tasks, task) }
+            ? { ...group, tasks: renew(group.tasks, task) }
             : group
         })
-      )),
-    )
+      ))
+    })
 
-    this.moveTask$.pipe(
-      concatMap(({ fromGroupId, toGroupId, fromIndex, toIndex }) =>
-        store.moveTask(fromGroupId, toGroupId, fromIndex, toIndex)),
-      map(({ fromGroupId, toGroupId, fromIndex, toIndex }) => (groups: IGroup[]) => 
-        reorderModelBetweenList(groups, 'tasks', fromGroupId, toGroupId, fromIndex, toIndex),
-      ),
-    ).subscribe(this.action$)
+    this.moveTask$.subscribe(({ fromGroupId, toGroupId, fromIndex, toIndex }) => {
+      this.updater$.next(
+        (groups: IGroup[]) => reorderBetween(groups, 'tasks', fromGroupId, toGroupId, fromIndex, toIndex),
+      )
+    })
 
-    this.removeTask$.pipe(
-      concatMap((taskId) => store.removeTask(taskId)),
-      map(({ groupId, taskId }) => (groups: IGroup[]) => (
+    this.removeTask$.subscribe(({ groupId, taskId }) => {
+      this.updater$.next((groups: IGroup[]) => (
         groups.map((group) => {
           return group.id === groupId
-            ? { ...group, tasks: removeModel(group.tasks, taskId) }
+            ? { ...group, tasks: removeById(group.tasks, taskId) }
             : group
         })
-      )),
-    )
+      ))
+    })
   }
 
-  public getBoard (id: number) {
-    this.getBoard$.next(id)
+  public dispatch (action: IAction) {
+    this.action$.next(action)
   }
 
-  public moveTask (fromGroupId: number, toGroupId: number, fromIndex: number, toIndex: number) {
-    this.moveTask$.next({ fromGroupId, toGroupId, fromIndex, toIndex })
-  }
-
-  public moveGroup (boardId: number, fromIndex: number, toIndex: number) {
-    this.moveGroup$.next({ boardId, fromIndex, toIndex })
-  }
-
-  public addGroup (boardId: number, title: string, color: string) {
-    this.addGroup$.next({ boardId, title, color })
-  }
-
-  public addTask (groupId: number, content: string, contentHtml: string, dueAt: number, tagIds: number[]) {
-    this.addTask$.next({ groupId, content, contentHtml, dueAt, tagIds })
-  }
 }
