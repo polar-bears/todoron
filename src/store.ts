@@ -27,7 +27,7 @@ function create<T> (attributes: any): T {
 }
 
 function toMap<T extends IBase> (list: T[]) {
-  const map: {[key: number]: T} = {}
+  const map: { [key: number]: T } = {}
 
   return list.reduce((m, item) => {
     m[item.id] = item
@@ -144,13 +144,14 @@ export class TodoronStore {
   }
 
   public async removeGroup (groupId: number) {
-    return db.transaction('rw', db.groups, async () => {
+    return db.transaction('rw', db.groups, db.tasks, db.boards, async () => {
       const group = await getGroup(groupId)
       const board = await getBoard(group.boardId)
 
       const groupIds = board.groupIds.filter((id) => id !== groupId)
 
       await db.boards.update(group.boardId, { groupIds })
+      await db.tasks.where('groupId').equals(groupId).delete()
       await db.groups.delete(groupId)
 
       return groupId
@@ -230,6 +231,10 @@ export class TodoronStore {
 
       return { groupId, taskId }
     })
+  }
+
+  public async getTask (taskId: number) {
+    return getTask(taskId)
   }
 }
 

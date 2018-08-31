@@ -15,6 +15,7 @@ export const ADD_TASK = 'ADD_TASK'
 export const UPDATE_TASK = 'UPDATE_TASK'
 export const MOVE_TASK = 'MOVE_TASK'
 export const REMOVE_TASK = 'REMOVE_TASK'
+export const SELECT_TASK = 'SELECT_TASK'
 
 export type ListBoardsPayload = undefined
 export class ListBoardsAction implements IAction {
@@ -86,4 +87,10 @@ export type RemoveTaskPayload = {taskId: number}
 export class RemoveTaskAction implements IAction {
   public readonly type = REMOVE_TASK
   public constructor (public payload: RemoveTaskPayload) {}
+}
+
+export type SelectTaskPayload = {taskId: number}
+export class SelectTaskAction implements IAction {
+  public readonly type = SELECT_TASK
+  public constructor (public payload: SelectTaskPayload) {}
 }

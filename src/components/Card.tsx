@@ -6,6 +6,7 @@ export interface ICardProps {
   className?: string
   checked?: boolean
   stacked?: boolean
+  onClick?: React.MouseEventHandler<HTMLDivElement>
 }
 
 export interface ICardState {}
@@ -13,10 +14,14 @@ export interface ICardState {}
 export default class Card extends React.Component<ICardProps, ICardState> {
 
   public render () {
-    const { className, children, stacked = false } = this.props
+    const { className, children, stacked = false, onClick } = this.props
 
     return (
-      <Wrapper className={className} stacked={stacked}>
+      <Wrapper
+        className={className}
+        stacked={stacked}
+        onClick={onClick}
+      >
         <Inner>
           {children}
         </Inner>

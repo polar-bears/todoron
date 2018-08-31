@@ -1,4 +1,5 @@
 import * as React from 'react'
+import ReactMarkdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
 import { Draggable, DraggableProvided, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd'
 
@@ -9,6 +10,7 @@ import Tag from './Tag'
 import TagContext from './TagContext'
 import { ITag, ITask } from '../models'
 
+// import CodeBlock from '../libs/codeBlock'
 const timeAgo = createTimeAgo()
 
 export interface ITaskCardContext {
@@ -18,6 +20,8 @@ export interface ITaskCardContext {
 export interface ITaskCardProps {
   task: ITask
   index: number
+  onClick?: (task: ITask) => void
+  onFinishedChange?: (task: ITask) => void
 }
 
 export interface ITaskCardState { }
@@ -30,8 +34,19 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
     return tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
   }
 
+  private onClick = () => {
+    const { task, onClick, } = this.props
+
+    if (onClick) onClick(task)
+  }
+
+  private onFinishedChange = (checked: boolean) => {
+    const { task, onFinishedChange, } = this.props
+    if (onFinishedChange) onFinishedChange(task)
+  }
+
   public render () {
-    const { task, index, } = this.props
+    const { task, index } = this.props
 
     const { id } = task
     const taskId = 'task' + id
@@ -48,14 +63,23 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
             <Card>
               <Header>
                 <Title>
-                  <Checkbox />
+                  <Checkbox checked={task.finished} onChange={this.onFinishedChange} />
                   <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
                 </Title>
                 {this.tags.map((tag) => (
                   <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
                 ))}
               </Header>
-              <Container>{task.content}</Container>
+              <Container onClick={this.onClick}>
+                <ReactMarkdown
+                  source={task && task.content || ''}
+                  className='markdown-body'
+                  allowNode={node => true}
+                  escapeHtml={false}
+                  skipHtml={false}
+                  // renderers={{ code: CodeBlock }}
+                />
+              </Container>
               <Footer>
                 {/* <DueTime overdue>
                   <DueTimeIcon size='small' name='Clock'/>
@@ -108,6 +132,7 @@ const DateInfo = styled.span(({ theme }) => ({
 const Container = styled.div(() => ({
   fontSize: '13px',
   overflow: 'hidden',
+  maxHeight: '400px',
 }))
 
 const Footer = styled.div(() => ({
