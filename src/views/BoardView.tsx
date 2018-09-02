@@ -165,7 +165,7 @@ export default class BoardView extends React.Component<IProps, IState> {
                     <Inner innerRef={provided.innerRef} {...provided.droppableProps}>
                       {groups.map((group, index) => (
                         <TaskGroup
-                          key={index}
+                          key={group.id}
                           group={group}
                           index={index}
                           onAddTask={this.onAddTask}

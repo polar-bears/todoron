@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
 import { Draggable, DraggableProvided, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd'
 
+import CodeBlock from '../libs/codeBlock'
 import styled from '../styles/theme'
 import Card from './Card'
 import Checkbox from './Checkbox'
@@ -10,9 +11,7 @@ import Tag from './Tag'
 import TagContext from './TagContext'
 import { ITag, ITask } from '../models'
 
-// import CodeBlock from '../libs/codeBlock'
 const timeAgo = createTimeAgo()
-
 export interface ITaskCardContext {
   tags: ITag[]
 }
@@ -77,7 +76,7 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
                   allowNode={node => true}
                   escapeHtml={false}
                   skipHtml={false}
-                  // renderers={{ code: CodeBlock }}
+                  renderers={{ code: CodeBlock }}
                 />
               </Container>
               <Footer>

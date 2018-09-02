@@ -7,13 +7,13 @@ import { Subscription } from 'rxjs'
 import Checkbox from '../components/Checkbox'
 import Icon from '../components/Icon'
 import ScrollArea from '../components/ScrollArea'
+import CodeBlock from '../libs/codeBlock'
 import styled from '../styles/theme'
 import { ITask } from '../models'
-import { taskViewService, boardViewService } from '../services'
+import { boardViewService, taskViewService } from '../services'
 import { SelectTaskAction, UpdateTaskAction } from '../services/actions'
 
 const timeAgo = createTimeAgo()
-
 export interface ITaskViewProps extends RouteComponentProps<{ taskId: string }> { }
 
 export interface ITaskViewState {
@@ -33,6 +33,7 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
   }
 
   public componentDidMount () {
+
     const taskId = Number(this.props.match.params.taskId)
 
     this.task$ = taskViewService.selectTask$.subscribe((task) => {
@@ -106,18 +107,19 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
                       allowNode={node => true}
                       escapeHtml={false}
                       skipHtml={false}
+                      renderers={{ code: CodeBlock }}
                     />
                   )
               }
             </ScrollArea>
           </Content>
           <Footer>
-            <DueTime overdue>
+            {/* <DueTime overdue>
               <DueTimeIcon size='small' name='Clock' />
               <DueTimeDetail>
                 Today at 10:00 am
               </DueTimeDetail>
-            </DueTime>
+            </DueTime> */}
           </Footer>
         </Container>
       </Wrapper>

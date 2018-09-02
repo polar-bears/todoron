@@ -1,12 +1,5 @@
 import * as React from 'react'
-
-interface IWindow {
-  hljs: any
-}
-
-declare const window: IWindow
-
-const hljs = window && window.hljs
+import hljs from 'highlight.js'
 
 interface IProps {
   value: string
@@ -29,11 +22,11 @@ export default class CodeBlock extends React.Component<IProps, IState> {
   }
 
   public componentDidMount () {
-    hljs.highlightBlock(this.codeEl)
+    if(this.codeEl) hljs.highlightBlock(this.codeEl)
   }
 
   public componentDidUpdate () {
-    hljs.highlightBlock(this.codeEl)
+    if(this.codeEl) hljs.highlightBlock(this.codeEl)
   }
 
   public render () {

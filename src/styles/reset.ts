@@ -50,4 +50,22 @@ injectGlobal`
     border-collapse: collapse;
     border-spacing: 0;
   }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-button {}
+  ::-webkit-scrollbar-track {
+    background: rgba(225, 225, 225, 0.2);
+  }
+  ::-webkit-scrollbar-track-piece {}
+  ::-webkit-scrollbar-thumb {
+    background: rgba(225, 225, 225, 0.8);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-corner {}
+  ::-webkit-scrollbar-resizer {}
+  .markdown-body {
+    padding-bottom: 4px;
+  }
 `
