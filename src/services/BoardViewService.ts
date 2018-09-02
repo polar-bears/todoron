@@ -139,9 +139,7 @@ export default class BoardViewService {
     this.updateTask$.subscribe((task) => {
       this.updater$.next((groups: IGroup[]) => (
         groups.map((group) => {
-          return group.id === task.groupId
-            ? { ...group, tasks: renew(group.tasks, task) }
-            : group
+          return { ...group, tasks: renew(group.tasks, task) }
         })
       ))
     })

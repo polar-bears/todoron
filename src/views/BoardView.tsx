@@ -3,6 +3,7 @@ import { RouteComponentProps } from 'react-router'
 import { Subscription } from 'rxjs'
 import { tag } from 'rxjs-spy/operators/tag'
 import { DragDropContext, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd'
+import { Route, Switch } from 'react-router-dom'
 
 import Group from '../components/Group'
 import GroupAddition from '../components/GroupAddition'
@@ -10,9 +11,18 @@ import ScrollArea from '../components/ScrollArea'
 import TagContext from '../components/TagContext'
 import TaskGroup from '../components/TaskGroup'
 import styled from '../styles/theme'
-import { IBoard, IGroup, ITag } from '../models'
+import TaskView from './TaskView'
+import { IBoard, IGroup, ITag, ITask } from '../models'
 import { boardViewService } from '../services'
-import { AddGroupAction, AddTaskAction, MoveGroupAction, MoveTaskAction } from '../services/actions'
+import {
+  AddGroupAction,
+  AddTaskAction,
+  MoveGroupAction,
+  MoveTaskAction,
+  RemoveGroupAction,
+  UpdateGroupAction,
+  UpdateTaskAction,
+} from '../services/actions'
 
 export interface IProps extends RouteComponentProps<{ boardId: string }> { }
 
@@ -77,12 +87,24 @@ export default class BoardView extends React.Component<IProps, IState> {
     reset()
   }
 
+  private onRemoveGroup = (group: IGroup) => {
+    boardViewService.dispatch(new RemoveGroupAction({ groupId: group.id }))
+  }
+
+  private onEditGroup = (group: IGroup, title: string) => {
+    boardViewService.dispatch(new UpdateGroupAction({ groupId: group.id, groupAttrs: { title } }))
+  }
+
   private onAddTask = ({ groupId, content }: any, reset: (reopen: boolean) => void, fromShortcut: boolean) => {
     boardViewService.dispatch(
       new AddTaskAction({ groupId, content, contentHtml: '', dueAt: -1, tagIds: [] }),
     )
 
     reset(fromShortcut)
+  }
+
+  private onClickTask = (task: ITask) => {
+    this.props.history.push(`/boards/${task.boardId}/task/${task.id}`)
   }
 
   private onDragEnd = (result: DropResult) => {
@@ -115,6 +137,11 @@ export default class BoardView extends React.Component<IProps, IState> {
     }
   }
 
+  private onFinishedChange = (task: ITask) => {
+    const taskId = task.id
+    boardViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: !task.finished } }))
+  }
+
   public render () {
     const { loading, groups } = this.state
 
@@ -128,9 +155,7 @@ export default class BoardView extends React.Component<IProps, IState> {
           <Header />
           <ScrollArea direction='horizontal'>
             <Container>
-              <DragDropContext
-                onDragEnd={this.onDragEnd}
-              >
+              <DragDropContext onDragEnd={this.onDragEnd}>
                 <Droppable
                   droppableId='board'
                   type='GROUPS'
@@ -144,6 +169,10 @@ export default class BoardView extends React.Component<IProps, IState> {
                           group={group}
                           index={index}
                           onAddTask={this.onAddTask}
+                          onClickTask={this.onClickTask}
+                          onFinishedChange={this.onFinishedChange}
+                          onRemoveGroup={this.onRemoveGroup}
+                          onEditGroup={this.onEditGroup}
                         />
                       ))}
                     </Inner>
@@ -154,6 +183,9 @@ export default class BoardView extends React.Component<IProps, IState> {
             </Container>
           </ScrollArea>
         </Wrapper>
+        <Switch>
+          <Route path='/boards/:boardId/task/:taskId' component={TaskView} />
+        </Switch>
       </TagContext.Provider>
     )
   }
@@ -172,10 +204,6 @@ const Container = styled.div(() => ({
   height: '100%',
   verticalAlign: 'top',
   whiteSpace: 'nowrap',
-
-  '& > div': {
-    whiteSpace: 'normal',
-  },
 }))
 
 const Inner = styled.div(() => ({

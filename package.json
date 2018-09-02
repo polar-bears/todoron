@@ -27,9 +27,11 @@
   },
   "homepage": "https://github.com/polar-bears/todoron#readme",
   "devDependencies": {
+    "@types/highlight.js": "^9.12.3",
     "babel-plugin-emotion": "^9.2.5",
     "babel-preset-env": "^1.7.0",
     "cross-env": "^5.2.0",
+    "highlight.js": "^9.12.0",
     "parcel-bundler": "^1.9.4",
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "^5.3.1",
@@ -44,9 +46,11 @@
     "@types/react-dom": "^16.0.6",
     "@types/react-router": "^4.0.28",
     "@types/react-router-dom": "^4.2.7",
+    "@types/showdown": "^1.7.5",
     "dexie": "^2.0.4",
     "emotion": "^9.2.5",
     "emotion-theming": "^9.2.5",
+    "github-markdown-css": "^2.10.0",
     "history": "^4.7.2",
     "polished": "^1.9.3",
     "prop-types": "^15.6.2",
@@ -55,10 +59,12 @@
     "react-dom": "^16.4.1",
     "react-emotion": "^9.2.5",
     "react-feather": "^1.1.1",
+    "react-markdown": "^3.4.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "rxjs": "^6.2.1",
     "rxjs-spy": "^7.0.2",
+    "showdown": "^1.8.6",
     "timeago.js": "^3.0.2"
   }
 }

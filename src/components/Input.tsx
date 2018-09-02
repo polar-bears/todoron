@@ -13,6 +13,7 @@ export interface IInputProps {
   autoFocus?: boolean
   placeholder?: string
   onChange?: (value: string, e: React.ChangeEvent<HTMLInputElement>) => void
+  onBlur?: (value: string, e: React.ChangeEvent<HTMLInputElement>) => void
   onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void
   onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
@@ -42,6 +43,14 @@ export default class Input extends React.Component<IInputProps, IInputState> {
 
     if (!disabled && onChange) {
       onChange(e.target.value, e)
+    }
+  }
+
+  private onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { disabled, onBlur } = this.props
+
+    if (!disabled && onBlur) {
+      onBlur(e.target.value, e)
     }
   }
 
@@ -75,6 +84,7 @@ export default class Input extends React.Component<IInputProps, IInputState> {
         disabled={disabled}
         onChange={this.onChange}
         onKeyDown={this.onKeyDown}
+        onBlur={this.onBlur}
       />
     )
   }
