@@ -63,7 +63,9 @@ export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGro
     return (
       <Header>
         <Title edit={edit} {...dragHandleProps}>
-          <label onDoubleClick={this.setEdit}>{title}</label> ({taskCount})</Title>
+          <label onDoubleClick={this.setEdit}>{title}</label>
+          <span>&nbsp;({taskCount})</span>
+        </Title>
         <Input value={title} onBlur={this.onEdit} onChange={this.onTitleChange} onEnter={this.onEdit} />
         <Actions>
           <Button size='small' icon='MoreVertical' />
@@ -147,6 +149,10 @@ const Title = styled.div<{ edit: boolean }>(({ theme, edit }) => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+    float: 'left',
+  },
+  '&>span': {
+    float: 'left',
   },
   '&~div': {
     opacity: edit ? 0 : 1,
