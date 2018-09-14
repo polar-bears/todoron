@@ -6,6 +6,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development parcel ./src/index.html --no-cache",
     "build": "cross-env NODE_ENV=production parcel build ./src/index.html --no-cache --no-minify --public-url ./",
+    "deploy": "gh-pages -d build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,9 +26,8 @@
   "bugs": {
     "url": "https://github.com/polar-bears/todoron/issues"
   },
-  "homepage": "https://github.com/polar-bears/todoron#readme",
+  "homepage": "https://polar-bears.github.io/todoron",
   "devDependencies": {
-    "@types/highlight.js": "^9.12.3",
     "babel-plugin-emotion": "^9.2.5",
     "babel-preset-env": "^1.7.0",
     "cross-env": "^5.2.0",
@@ -39,6 +39,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
+    "@types/highlight.js": "^9.12.3",
     "@types/history": "^4.6.2",
     "@types/prop-types": "^15.5.3",
     "@types/react": "^16.4.6",
@@ -50,6 +51,7 @@
     "dexie": "^2.0.4",
     "emotion": "^9.2.5",
     "emotion-theming": "^9.2.5",
+    "gh-pages": "^1.2.0",
     "github-markdown-css": "^2.10.0",
     "history": "^4.7.2",
     "polished": "^1.9.3",
@@ -59,7 +61,7 @@
     "react-dom": "^16.4.1",
     "react-emotion": "^9.2.5",
     "react-feather": "^1.1.1",
-    "react-markdown": "^3.4.1",
+    "react-markdown": "^3.6.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "rxjs": "^6.2.1",
