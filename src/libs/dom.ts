@@ -6,7 +6,7 @@ export function getNativeScrollBarSize () {
   }
 
   const div = document.createElement('div')
-  
+
   div.style.position = 'absolute'
   div.style.top = '-9999px'
   div.style.height = '100px'

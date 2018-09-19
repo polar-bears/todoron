@@ -193,7 +193,7 @@ const Option = styled.div(() => ({
   cursor: 'pointer',
   '&:hover': {
     background: '#eee',
-  }
+  },
 }))
 
 const Container = styled.div(() => ({

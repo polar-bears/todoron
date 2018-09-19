@@ -64,7 +64,7 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
     this.$container.addEventListener('mousewheel', this.onMouseWheel)
     this.$thumbVertical.addEventListener('mousedown', this.onThumbVerticalMouseDown)
     this.$thumbHorizontal.addEventListener('mousedown', this.onThumbHorizontalMouseDown)
-    
+
     this.updateStyles()
   }
 
