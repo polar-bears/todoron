@@ -1,11 +1,10 @@
 import * as React from 'react'
-import ReactMarkdown from 'react-markdown'
+import Markdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
 import { RouteComponentProps } from 'react-router'
 import { Subscription } from 'rxjs'
 
 import Checkbox from '../components/Checkbox'
-import Icon from '../components/Icon'
 import ScrollArea from '../components/ScrollArea'
 import CodeBlock from '../libs/codeBlock'
 import styled from '../styles/theme'
@@ -14,6 +13,7 @@ import { boardViewService, taskViewService } from '../services'
 import { SelectTaskAction, UpdateTaskAction } from '../services/actions'
 
 const timeAgo = createTimeAgo()
+
 export interface ITaskViewProps extends RouteComponentProps<{ taskId: string }> { }
 
 export interface ITaskViewState {
@@ -23,9 +23,9 @@ export interface ITaskViewState {
 
 export default class TaskView extends React.Component<ITaskViewProps, ITaskViewState> {
 
-  private task$!: Subscription
+  private task$$!: Subscription
 
-  private updateTask$!: Subscription
+  private updateTask$$!: Subscription
 
   public state: ITaskViewState = {
     task: null,
@@ -33,10 +33,9 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
   }
 
   public componentDidMount () {
-
     const taskId = Number(this.props.match.params.taskId)
 
-    this.task$ = taskViewService.selectTask$.subscribe((task) => {
+    this.task$$ = taskViewService.selectTask$.subscribe((task) => {
       this.setState({ task })
     })
 
@@ -44,8 +43,8 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
   }
 
   public componentWillUnmount () {
-    this.task$.unsubscribe()
-    if (this.updateTask$) this.updateTask$.unsubscribe()
+    this.task$$.unsubscribe()
+    if (this.updateTask$$) this.updateTask$$.unsubscribe()
   }
 
   public onClose = () => {
@@ -60,7 +59,7 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
     if (this.state.task && this.state.task.content === content) return
 
     const taskId = Number(this.props.match.params.taskId)
-    this.updateTask$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
+    this.updateTask$$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
     taskViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { content } }))
 
     boardViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { content } }))
@@ -72,45 +71,46 @@ export default class TaskView extends React.Component<ITaskViewProps, ITaskViewS
 
   private onCheckboxChange = (checked: boolean) => {
     const taskId = Number(this.props.match.params.taskId)
-    this.updateTask$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
-    taskViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: checked } }))
 
+    this.updateTask$$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
+
+    taskViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: checked } }))
     boardViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: checked } }))
   }
 
   public render () {
     const { task, editable, } = this.state
+
+    if (!task) return null
+
     return (
-      <Wrapper>
-        <Mask onClick={this.onClose} />
+      <Wrapper onClick={this.onClose}>
         <Container>
           <Header>
             <Title>
-              <Checkbox checked={task && task.finished || false} onChange={this.onCheckboxChange} />
+              <Checkbox checked={task.finished} onChange={this.onCheckboxChange}/>
               <DateInfo>Created at {timeAgo.format(new Date())}</DateInfo>
             </Title>
           </Header>
           <Content onDoubleClick={this.onClick}>
             <ScrollArea>
-              {
-                editable
-                  ? (<EditDiv
-                    onBlur={this.onBlur}
-                    contentEditable={editable}
-                  >
-                    {task && task.content}
-                  </EditDiv>)
-                  : (
-                    <ReactMarkdown
-                      source={task && task.content || ''}
-                      className='markdown-body'
-                      allowNode={node => true}
-                      escapeHtml={false}
-                      skipHtml={false}
-                      renderers={{ code: CodeBlock }}
-                    />
-                  )
-              }
+              {editable ? (
+                <EditDiv
+                  onBlur={this.onBlur}
+                  contentEditable={editable}
+                >
+                  {task.content}
+                </EditDiv>
+              ) : (
+                <Markdown
+                  source={task.content}
+                  className='markdown-body'
+                  allowNode={() => true}
+                  escapeHtml={false}
+                  skipHtml={false}
+                  renderers={{ code: CodeBlock }}
+                />
+              )}
             </ScrollArea>
           </Content>
           <Footer>
@@ -133,24 +133,15 @@ const Wrapper = styled.div(() => ({
   bottom: 0,
   left: 0,
   right: 0,
-  zIndex: 99,
-}))
-
-const Mask = styled.div(() => ({
-  position: 'fixed',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: 9999,
+  zIndex: 10,
+  width: '100%',
+  height: '100%',
   background: 'rgba(238, 236, 232, .8)',
+  overflowY: 'auto',
 }))
 
 const Container = styled.div(() => ({
-  position: 'relative',
-  zIndex: 99999,
-  top: 0,
-  margin: '154px auto auto',
+  margin: '150px auto auto',
   padding: '10px',
   background: '#fff',
   width: '520px',
@@ -193,17 +184,17 @@ const Footer = styled.div(() => ({
   bottom: '10px',
 }))
 
-const DueTime = styled.span<{ overdue: boolean }>(({ theme, overdue }) => ({
-  color: overdue ? theme.colors.red : theme.fg,
-  userSelect: 'none',
-}))
+// const DueTime = styled.span<{ overdue: boolean }>(({ theme, overdue }) => ({
+//   color: overdue ? theme.colors.red : theme.fg,
+//   userSelect: 'none',
+// }))
 
-const DueTimeIcon = styled(Icon)(() => ({
-  verticalAlign: 'middle',
-}))
+// const DueTimeIcon = styled(Icon)(() => ({
+//   verticalAlign: 'middle',
+// }))
 
-const DueTimeDetail = styled.span(() => ({
-  marginLeft: '5px',
-  verticalAlign: 'middle',
-  fontSize: '12px',
-}))
+// const DueTimeDetail = styled.span(() => ({
+//   marginLeft: '5px',
+//   verticalAlign: 'middle',
+//   fontSize: '12px',
+// }))

@@ -35,9 +35,9 @@ export interface IState {
 
 export default class BoardView extends React.Component<IProps, IState> {
 
-  private board$!: Subscription
+  private board$$!: Subscription
 
-  private groups$!: Subscription
+  private groups$$!: Subscription
 
   // private tag$!: Subscription
 
@@ -48,7 +48,7 @@ export default class BoardView extends React.Component<IProps, IState> {
   }
 
   public componentDidMount () {
-    this.board$ = boardViewService.board$
+    this.board$$ = boardViewService.board$
       .subscribe((board) => {
         if (board) {
           this.setState({ board })
@@ -57,7 +57,7 @@ export default class BoardView extends React.Component<IProps, IState> {
         }
       })
 
-    this.groups$ = boardViewService.groups$
+    this.groups$$ = boardViewService.groups$
       .pipe(tag('groups$'))
       .subscribe((groups) => this.setState({ groups, loading: false }))
 
@@ -75,8 +75,8 @@ export default class BoardView extends React.Component<IProps, IState> {
   }
 
   public componentWillUnmount () {
-    this.board$.unsubscribe()
-    this.groups$.unsubscribe()
+    this.board$$.unsubscribe()
+    this.groups$$.unsubscribe()
   }
 
   private onAddGroup = (title: string, reset: () => void) => {

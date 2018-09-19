@@ -33,6 +33,6 @@ export const lightTheme = {
   borderDarker: `1.5px solid ${colors.gray6}`,
 }
 
-const styled = _styled as CreateStyled<typeof lightTheme> 
+const styled = _styled as CreateStyled<typeof lightTheme>
 
 export default styled
