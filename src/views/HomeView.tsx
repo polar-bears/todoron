@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router'
-import { Subscription } from 'rxjs'
-import { tag } from 'rxjs-spy/operators'
+import { observer } from 'mobx-react'
 
 import BoardItem from '../components/BoardItem'
 import Button from '../components/Button'
@@ -13,8 +12,7 @@ import TopBar from '../components/TopBar'
 import styled from '../styles/theme'
 import BoardView from './BoardView'
 import { IBoard } from '../models'
-import { boardViewService, homeViewService } from '../services'
-import { AddBoardAction, ListBoardsAction } from '../services/actions'
+import { boardStore } from '../stores'
 
 export interface IProps extends RouteComponentProps<{}> {}
 
@@ -23,47 +21,30 @@ export interface IState {
   expanded: boolean
   adding: boolean
   addingTitle: string
-  boards: IBoard[]
-  board?: IBoard
 }
 
+@observer
 export default class HomeView extends React.Component<IProps, IState> {
 
   private refAddingInput = React.createRef<Input>()
-
-  private boards$$!: Subscription
-
-  private board$$!: Subscription
-
-  private addBoard$$!: Subscription
 
   public state: IState = {
     loading: true,
     expanded: false,
     adding: false,
     addingTitle: '',
-    boards: [],
   }
 
   public componentDidMount () {
-    this.boards$$ = homeViewService.boards$
-      .pipe(tag('boards$'))
-      .subscribe((boards) => this.setState({ boards, loading: false }))
-
-    this.board$$ = boardViewService.board$
-      .pipe(tag('board$'))
-      .subscribe((board) => this.setState({ board }))
-
-    this.addBoard$$ = homeViewService.addBoard$
-      .subscribe((board) => this.props.history.push(`/boards/${board.id}`))
-
-    homeViewService.dispatch(new ListBoardsAction())
+    this.load()
   }
 
-  public componentWillUnmount () {
-    this.boards$$.unsubscribe()
-    this.board$$.unsubscribe()
-    this.addBoard$$.unsubscribe()
+  private async load () {
+    this.setState({ loading: true })
+
+    await boardStore.listBoards()
+
+    this.setState({ loading: false })
   }
 
   private onToggleSidePanel = () => {
@@ -85,10 +66,11 @@ export default class HomeView extends React.Component<IProps, IState> {
     this.setState({ addingTitle: value })
   }
 
-  private onAddingConfirm = () => {
+  private onAddingConfirm = async () => {
     const title = this.state.addingTitle.trim()
 
-    homeViewService.dispatch(new AddBoardAction({ title }))
+    await boardStore.addBoard(title)
+
     this.setState({ adding: false, addingTitle: '' })
   }
 
@@ -97,11 +79,10 @@ export default class HomeView extends React.Component<IProps, IState> {
   }
 
   public render () {
-    const { loading, expanded, adding, addingTitle, boards, board } = this.state
+    const { loading, expanded, adding, addingTitle } = this.state
+    const { boards, selectedBoard: board } = boardStore
 
-    if (loading) {
-      return null
-    }
+    if (loading) return null
 
     return (
       <Wrapper>

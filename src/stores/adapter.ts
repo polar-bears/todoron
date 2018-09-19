@@ -1,3 +1,5 @@
+import { toJS } from 'mobx'
+
 import { IBase } from '../models'
 
 export function addOne<T extends IBase> (list: T[], newItem: T, prepend?: boolean) {
@@ -25,7 +27,7 @@ export function reorderBetween<T extends IBase> (
   fromIndex: number,
   toIndex: number,
 ) {
-  list = [...list]
+  list = [...toJS(list)]
 
   const from = list.find((item) => item.id === fromId) as any
   const to = list.find((item) => item.id === toId) as any

@@ -2,84 +2,85 @@ import * as React from 'react'
 import Markdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
 import { RouteComponentProps } from 'react-router'
-import { Subscription } from 'rxjs'
+import { observer } from 'mobx-react'
 
 import Checkbox from '../components/Checkbox'
 import ScrollArea from '../components/ScrollArea'
 import CodeBlock from '../libs/codeBlock'
 import styled from '../styles/theme'
-import { ITask } from '../models'
-import { boardViewService, taskViewService } from '../services'
-import { SelectTaskAction, UpdateTaskAction } from '../services/actions'
+import { taskStore } from '../stores'
 
 const timeAgo = createTimeAgo()
 
-export interface ITaskViewProps extends RouteComponentProps<{ taskId: string }> { }
+export interface IProps extends RouteComponentProps<{ boardId: string, taskId: string }> { }
 
-export interface ITaskViewState {
-  task: ITask | null
+export interface IState {
   editable: boolean
 }
 
-export default class TaskView extends React.Component<ITaskViewProps, ITaskViewState> {
+@observer
+export default class TaskView extends React.Component<IProps, IState> {
 
-  private task$$!: Subscription
-
-  private updateTask$$!: Subscription
-
-  public state: ITaskViewState = {
-    task: null,
+  public state: IState = {
     editable: false,
   }
 
   public componentDidMount () {
+    const boardId = this.props.match.params.boardId
     const taskId = Number(this.props.match.params.taskId)
 
-    this.task$$ = taskViewService.selectTask$.subscribe((task) => {
-      this.setState({ task })
-    })
+    taskStore.selectTask(taskId)
 
-    taskViewService.dispatch(new SelectTaskAction({ taskId }))
+    if (!taskStore.selectedTask) {
+      this.props.history.push('/boards/' + boardId)
+    }
+  }
+
+  public componentDidUpdate (prevProps: IProps, prevState: IState) {
+    const boardId = this.props.match.params.boardId
+    const taskId = Number(this.props.match.params.taskId)
+    const prevTaskId = Number(prevProps.match.params.taskId)
+
+    if (taskId !== prevTaskId) {
+      taskStore.selectTask(taskId)
+
+      if (!taskStore.selectedTask) {
+        this.props.history.push(`/boards/${boardId}`)
+      }
+    }
   }
 
   public componentWillUnmount () {
-    this.task$$.unsubscribe()
-    if (this.updateTask$$) this.updateTask$$.unsubscribe()
+    taskStore.selectTask(null)
   }
 
   public onClose = () => {
-    const { task } = this.state
-    if (task) this.props.history.push(`/boards/${task.boardId}`)
+    const boardId = this.props.match.params.boardId
+    this.props.history.push(`/boards/${boardId}`)
   }
 
-  private onBlur = (e: React.ChangeEvent<any>) => {
-    const content = e.target.innerText
-    this.setState({ editable: false })
-
-    if (this.state.task && this.state.task.content === content) return
-
+  private onBlur = async (e: React.ChangeEvent<any>) => {
     const taskId = Number(this.props.match.params.taskId)
-    this.updateTask$$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
-    taskViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { content } }))
+    const content = e.target.innerText
 
-    boardViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { content } }))
+    await taskStore.updateTask(taskId, { content })
+
+    this.setState({ editable: false })
   }
 
   private onClick = (e: React.ChangeEvent<any>) => {
     this.setState({ editable: true })
   }
 
-  private onCheckboxChange = (checked: boolean) => {
+  private onCheckboxChange = async (finished: boolean) => {
     const taskId = Number(this.props.match.params.taskId)
 
-    this.updateTask$$ = taskViewService.updateTask$.subscribe((task) => this.setState({ task }))
-
-    taskViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: checked } }))
-    boardViewService.dispatch(new UpdateTaskAction({ taskId, taskAttrs: { finished: checked } }))
+    await taskStore.updateTask(taskId, { finished })
   }
 
   public render () {
-    const { task, editable, } = this.state
+    const { editable, } = this.state
+    const { selectedTask: task } = taskStore
 
     if (!task) return null
 
