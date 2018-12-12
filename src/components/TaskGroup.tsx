@@ -1,6 +1,4 @@
 import * as React from 'react'
-import { Draggable, DraggableProvided, Droppable, DroppableProvided } from 'react-beautiful-dnd'
-
 import Button from '../components/Button'
 import Group from '../components/Group'
 import TaskCard from '../components/TaskCard'
@@ -8,21 +6,45 @@ import styled from '../styles/theme'
 import Card from './Card'
 import Input from './Input'
 import TaskAddition, { ConfirmData } from '../components/TaskAddition'
-import { IGroup, ITask } from '../models'
+import { IGroup, ITask, ISortable } from '../models'
+import Sortable from './Sortable'
 
 export interface ITaskGroupProps {
   group: IGroup
-  index: number
   onAddTask?: (data: ConfirmData, reset: (reopen?: boolean) => void, fromShortcut: boolean) => void
   onClickTask?: (task: ITask) => void
   onFinishedChange?: (task: ITask) => void
   onRemoveGroup?: (group: IGroup) => void
   onEditGroup?: (group: IGroup, title: string) => void
+  onSort?: ({ order, sortable, evt, remoteOrder, remoteSortable }: ISortable) => void
 }
 
 export interface ITaskGroupState {
   edit: boolean,
   title: string,
+}
+
+interface IInnerList {
+  tasks: any
+  onClickTask?: (task: ITask) => void
+  onFinishedChange?: (task: ITask) => void
+}
+
+class InnerList extends React.Component<IInnerList> {
+
+  public render () {
+    return this.props.tasks && this.props.tasks.map((task: ITask, i: number) =>
+      task && (
+        <TaskCard
+          key={task.id}
+          task={task}
+          index={i}
+          onClick={this.props.onClickTask}
+          onFinishedChange={this.props.onFinishedChange}
+        />
+      ),
+    )
+  }
 }
 
 export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGroupState> {
@@ -57,12 +79,11 @@ export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGro
     edit: boolean,
     title: string,
     taskCount: number,
-    dragHandleProps: any,
   }) => {
-    const { title, taskCount, dragHandleProps, edit } = params
+    const { title, taskCount, edit } = params
     return (
       <Header>
-        <Title edit={edit} {...dragHandleProps}>
+        <Title edit={edit}>
           <label onDoubleClick={this.setEdit}>{title}</label>
           <span>&nbsp;({taskCount})</span>
         </Title>
@@ -81,52 +102,43 @@ export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGro
   }
 
   public render () {
-    const { group, index, onAddTask, onClickTask, onFinishedChange } = this.props
+    const { group, onAddTask, onClickTask, onFinishedChange, onSort } = this.props
     const { edit, title } = this.state
 
     const { id, tasks } = group
-    const groupId = id.toString()
+    const groupId = 'group' + id
 
     return (
-      <Draggable key={id} draggableId={groupId} index={index}>
-        {(provided: DraggableProvided) => (
-          <Wrapper innerRef={provided.innerRef} {...provided.draggableProps}>
-            <Droppable droppableId={groupId} type='TASKS'>
-              {(dropProvided: DroppableProvided) => (
-                <Container innerRef={dropProvided.innerRef} {...dropProvided.droppableProps}>
-                  <Group
-                    key={id}
-                    header={this.renderHeader({
-                      edit,
-                      title,
-                      taskCount: tasks.length,
-                      dragHandleProps: provided.dragHandleProps,
-                    })}
-                    footer={<TaskAddition groupId={id} onConfirm={onAddTask} />}
-                  >
-                    {tasks.map((task, i) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        index={i}
-                        onClick={onClickTask}
-                        onFinishedChange={onFinishedChange}
-                      />
-                    ))}
-                    {dropProvided.placeholder}
-                  </Group>
-                </Container>
-              )}
-            </Droppable>
-          </Wrapper>
-        )}
-      </Draggable>
+      <Group
+        type='group'
+        groupId={id}
+        key={groupId}
+        header={this.renderHeader({
+          edit,
+          title,
+          taskCount: tasks.length,
+        })}
+        footer={<TaskAddition groupId={id} onConfirm={onAddTask} />}
+      >
+        <Sortable
+          options={{ group: 'tasks', animation: 150 }}
+          onChange={onSort}
+          tag={Wrapper}
+          data-gid={id}
+        >
+          <InnerList tasks={tasks} onClickTask={onClickTask} onFinishedChange={onFinishedChange} />
+        </Sortable>
+      </Group>
+
     )
   }
 
 }
 
-const Wrapper = styled.div(() => ({}))
+const Wrapper = styled.div(() => ({
+  minHeight: '90px',
+  padding: '0 20px 0 10px',
+}))
 
 const Header = styled.div(() => ({
   display: 'flex',
@@ -193,11 +205,5 @@ const Option = styled.div(() => ({
   cursor: 'pointer',
   '&:hover': {
     background: '#eee',
-  },
-}))
-
-const Container = styled.div(() => ({
-  '&:empty': {
-    padding: 0,
   },
 }))

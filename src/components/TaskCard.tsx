@@ -1,8 +1,6 @@
 import * as React from 'react'
 import ReactMarkdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
-import { Draggable, DraggableProvided, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd'
-
 import styled from '../styles/theme'
 import Card from './Card'
 import Checkbox from './Checkbox'
@@ -12,6 +10,7 @@ import TagContext from './TagContext'
 import { ITag, ITask } from '../models'
 
 const timeAgo = createTimeAgo()
+
 export interface ITaskCardContext {
   tags: ITag[]
 }
@@ -45,52 +44,43 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
   }
 
   public render () {
-    const { task, index } = this.props
+    const { task } = this.props
 
     const { id } = task
     const taskId = 'task' + id
 
     return (
-      <Draggable key={taskId} index={index} draggableId={taskId}>
-        {(dragProvided: DraggableProvided) => (
-          <Wrapper
-            draggableStyle={dragProvided.draggableProps.style || {}}
-            innerRef={dragProvided.innerRef}
-            {...dragProvided.draggableProps}
-            {...dragProvided.dragHandleProps}
-          >
-            <Card>
-              <Header>
-                <Title>
-                  <Checkbox checked={task.finished} onChange={this.onFinishedChange} />
-                  <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
-                </Title>
-                {this.tags.map((tag) => (
-                  <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
-                ))}
-              </Header>
-              <Container onClick={this.onClick}>
-                <ReactMarkdown
-                  source={task && task.content || ''}
-                  className='markdown-body'
-                  allowNode={node => true}
-                  escapeHtml={false}
-                  skipHtml={false}
-                  renderers={{ code: CodeBlock }}
-                />
-              </Container>
-              <Footer>
-                {/* <DueTime overdue>
+      <Wrapper key={taskId}>
+        <Card data-id={id}>
+          <Header>
+            <Title>
+              <Checkbox checked={task.finished} onChange={this.onFinishedChange} />
+              <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
+            </Title>
+            {this.tags.map((tag) => (
+              <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
+            ))}
+          </Header>
+          <Container onClick={this.onClick}>
+            <ReactMarkdown
+              source={task && task.content || ''}
+              className='markdown-body'
+              allowNode={node => true}
+              escapeHtml={false}
+              skipHtml={false}
+              renderers={{ code: CodeBlock }}
+            />
+          </Container>
+          <Footer>
+            {/* <DueTime overdue>
                   <DueTimeIcon size='small' name='Clock'/>
                   <DueTimeDetail>
                     Today at 10:00 am
                   </DueTimeDetail>
                 </DueTime> */}
-              </Footer>
-            </Card>
-          </Wrapper>
-        )}
-      </Draggable>
+          </Footer>
+        </Card>
+      </Wrapper>
     )
   }
 
@@ -106,9 +96,8 @@ export default function TaskCard (props: ITaskCardProps) {
   )
 }
 
-const Wrapper = styled.div<{ draggableStyle: DraggingStyle | NotDraggingStyle, }>(({ draggableStyle }) => ({
-  ...draggableStyle,
-  margin: '0 10px 10px 10px',
+const Wrapper = styled.div(() => ({
+  margin: '0 0 10px',
 }))
 
 const Header = styled.div(() => ({

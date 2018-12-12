@@ -129,7 +129,9 @@ export default class BoardView extends React.Component<IProps, IState> {
           <Header/>
           <ScrollArea direction='horizontal'>
             <Container>
-              <DragDropContext onDragEnd={this.onDragEnd}>
+              <DragDropContext
+                onDragEnd={this.onDragEnd}
+              >
                 <Droppable
                   droppableId='board'
                   type='GROUPS'
@@ -141,7 +143,6 @@ export default class BoardView extends React.Component<IProps, IState> {
                         <TaskGroup
                           key={group.id}
                           group={group}
-                          index={index}
                           onAddTask={this.onAddTask}
                           onClickTask={this.onClickTask}
                           onFinishedChange={this.onFinishedChange}

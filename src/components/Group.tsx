@@ -7,6 +7,8 @@ export interface IGroupProps {
   className?: string
   header?: React.ReactNode
   footer?: React.ReactNode
+  groupId?: string | number
+  type?: string
 }
 
 export interface IGroupState {
@@ -69,11 +71,13 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
   }
 
   public render () {
-    const { className, header, children, footer } = this.props
+    const { className, header, children, footer, groupId, type } = this.props
     const { height } = this.state
 
     return (
       <Wrapper
+        data-gid={groupId}
+        data-type={type}
         className={className}
         innerRef={this.refWrapper}
       >
@@ -109,7 +113,7 @@ const Header = styled.div()
 
 const Container = styled.div(() => ({
   flex: '1',
-  minHeight: 0,
+  minHeight: 'auto',
 }))
 
 const Footer = styled.div()

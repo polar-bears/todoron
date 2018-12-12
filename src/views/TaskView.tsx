@@ -6,7 +6,7 @@ import { observer } from 'mobx-react'
 
 import Checkbox from '../components/Checkbox'
 import ScrollArea from '../components/ScrollArea'
-import CodeBlock from '../libs/codeBlock'
+import CodeBlock from '../components/codeBlock'
 import styled from '../styles/theme'
 import { taskStore } from '../stores'
 

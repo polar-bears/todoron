@@ -155,7 +155,7 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
     this.updateStyles()
   }
 
-  private onMouseWheel = (e: WheelEvent) => {
+  private onMouseWheel = (e: any) => {
     if (this.props.direction === 'horizontal') {
       this.$container.scrollLeft += -e.wheelDelta
     } else {
@@ -250,6 +250,13 @@ const Container = styled.div<{direction: DirectionType}>(({ direction }) => (
     overflowX: 'hidden',
     marginRight: direction === 'vertical' ? `-${getBarSize()}px` : 0,
     marginBottom: 0,
+
+    msOverflowStyle: 'none', // IE 10+
+    overflow: '-moz-scrollbars-none',  // Firefox
+    '&::-webkit-scrollbar': {
+      width: '0px',
+      background: 'transparent',
+    },
   } : {
     height: `calc(100% + ${getBarSize()}px)`,
     width: '100%',
@@ -257,6 +264,13 @@ const Container = styled.div<{direction: DirectionType}>(({ direction }) => (
     overflowX: direction === 'horizontal' ? 'scroll' : 'hidden',
     marginRight: 0,
     marginBottom: direction === 'horizontal' ? `-${getBarSize()}px` : 0,
+
+    msOverflowStyle: 'none', // IE 10+
+    overflow: '-moz-scrollbars-none',  // Firefox
+    '&::-webkit-scrollbar': {
+      width: '0px',
+      background: 'transparent',
+    },
   }
 ))
 
