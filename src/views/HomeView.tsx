@@ -9,11 +9,11 @@ import Input from '../components/Input'
 import Logo from '../components/Logo'
 import SidePanel from '../components/SidePanel'
 import TopBar from '../components/TopBar'
-import styled from '../styles/theme'
-import BoardView from './BoardView'
+import styled from '../styles/styled-components'
+import Board from './Board'
+import TaskView from './TaskView'
 import { IBoard } from '../models'
 import { boardStore } from '../stores'
-import Board from './Board'
 
 export interface IProps extends RouteComponentProps<{}> {}
 
@@ -144,7 +144,7 @@ export default class HomeView extends React.Component<IProps, IState> {
           </SidePanel>
           <Switch>
             <Route path='/boards/:boardId' component={Board}/>
-            {/* <Route path='/boards/:boardId' component={BoardView}/> */}
+            <Route path='/boards/:boardId/task/:taskId' component={TaskView}/>
             <Redirect to={`/boards/${boards[0].id}`}/>
           </Switch>
         </Container>

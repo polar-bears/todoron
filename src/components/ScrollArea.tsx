@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import { getNativeScrollBarSize as getBarSize } from '../libs/dom'
 
 const THUMB_MIN_SIZE = 30
@@ -211,13 +211,13 @@ export default class ScrollArea extends React.Component<IScrollAreaProps, IScrol
     } = this.state
 
     return (
-      <Wrapper className={className} innerRef={this.refWrapper} style={style}>
-        <Container innerRef={this.refContainer} direction={direction}>{children}</Container>
-        <TrackVertical innerRef={this.refTrackVertical} visible={trackVerticalVisible}>
-          <ThumbVertical innerRef={this.refThumbVertical} style={thumbVerticalStyle}/>
+      <Wrapper className={className} ref={this.refWrapper} style={style}>
+        <Container ref={this.refContainer} direction={direction}>{children}</Container>
+        <TrackVertical ref={this.refTrackVertical} visible={trackVerticalVisible}>
+          <ThumbVertical ref={this.refThumbVertical} style={thumbVerticalStyle}/>
         </TrackVertical>
-        <TrackHorizontal innerRef={this.refTrackHorizontal} visible={trackHorizontalVisible}>
-          <ThumbHorizontal innerRef={this.refThumbHorizontal} style={thumbHorizontalStyle}/>
+        <TrackHorizontal ref={this.refTrackHorizontal} visible={trackHorizontalVisible}>
+          <ThumbHorizontal ref={this.refThumbHorizontal} style={thumbHorizontalStyle}/>
         </TrackHorizontal>
         <ShadowTop visible={shadowTopVisible}/>
         <ShadowBottom visible={shadowBottomVisible}/>

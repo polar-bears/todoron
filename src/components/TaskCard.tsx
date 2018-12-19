@@ -1,7 +1,8 @@
 import * as React from 'react'
-import ReactMarkdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
-import styled from '../styles/theme'
+import ReactMarkdown, { MarkdownAbstractSyntaxTree } from 'react-markdown'
+
+import styled from '../styles/styled-components'
 import Card from './Card'
 import Checkbox from './Checkbox'
 import CodeBlock from './CodeBlock'
@@ -65,7 +66,7 @@ class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext
             <ReactMarkdown
               source={task && task.content || ''}
               className='markdown-body'
-              allowNode={node => true}
+              allowNode={(node: MarkdownAbstractSyntaxTree) => true}
               escapeHtml={false}
               skipHtml={false}
               renderers={{ code: CodeBlock }}

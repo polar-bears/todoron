@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 
 export interface ICheckboxProps {
   className?: string
@@ -57,7 +57,7 @@ const Content = styled.span(({ theme }) => ({
   },
   '&::after': {
     position: 'absolute',
-    top: '1',
+    top: '1px',
     display: 'block',
     width: '16px',
     height: '8px',

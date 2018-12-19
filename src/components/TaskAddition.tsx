@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import Button from './Button'
 import Card from './Card'
 import TagContext from './TagContext'
@@ -84,7 +84,7 @@ class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdd
     }
 
     return (
-      <StyledCard>
+      <StyledCard as={Card}>
         <Textarea
           autoFocus
           rows={3}
@@ -130,7 +130,7 @@ export default function TaskAddition (props: ITaskAdditionProps) {
   )
 }
 
-const StyledCard = styled(Card)(() => ({
+const StyledCard = styled.div(() => ({
   margin: '10px',
 }))
 

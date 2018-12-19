@@ -5,9 +5,9 @@ import { RouteComponentProps } from 'react-router'
 import { observer } from 'mobx-react'
 
 import Checkbox from '../components/Checkbox'
+import CodeBlock from '../components/CodeBlock'
 import ScrollArea from '../components/ScrollArea'
-import CodeBlock from '../components/codeBlock'
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import { taskStore } from '../stores'
 
 const timeAgo = createTimeAgo()

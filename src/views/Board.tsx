@@ -8,7 +8,7 @@ import ScrollArea from '../components/ScrollArea'
 import Sortable from '../components/Sortable'
 import TagContext from '../components/TagContext'
 import TaskGroup from '../components/TaskGroup'
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import { boardStore, taskStore } from '../stores'
 import { IGroup, ISortable, ITask } from '../models'
 

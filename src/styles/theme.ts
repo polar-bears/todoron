@@ -1,5 +1,3 @@
-import _styled, { CreateStyled } from 'react-emotion'
-
 const colors = {
   gray1: '#FAFCFF',
   gray2: '#F2F6F8',
@@ -32,7 +30,3 @@ export const lightTheme = {
   borderDark: `1.5px solid ${colors.gray5}`,
   borderDarker: `1.5px solid ${colors.gray6}`,
 }
-
-const styled = _styled as CreateStyled<typeof lightTheme>
-
-export default styled
