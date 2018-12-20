@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 
 export interface ICardProps {
   className?: string
@@ -33,7 +33,7 @@ export default class Card extends React.Component<ICardProps, ICardState> {
 
 const Wrapper = styled.div<{stacked: boolean}>(({ theme, stacked }) => ({
   position: 'relative',
-  '&::before': stacked && {
+  '&::before': stacked ? {
     position: 'absolute',
     bottom: '-4px',
     left: '5px',
@@ -43,7 +43,7 @@ const Wrapper = styled.div<{stacked: boolean}>(({ theme, stacked }) => ({
     background: theme.bgLighter,
     boxShadow: theme.boxShadowLight,
     borderRadius: theme.borderRadius,
-  },
+  } : '',
   '&:not(:last-child)': {
     marginBottom: '10px',
   },

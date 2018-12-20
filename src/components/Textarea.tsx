@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 
 export interface ITextAreaProps {
   className?: string
@@ -62,7 +62,7 @@ export default class TextArea extends React.Component<ITextAreaProps, ITextAreaS
       <Wrapper>
         <OriginalTextArea
           className={className}
-          innerRef={this.refTextArea}
+          ref={this.refTextArea}
           rows={rows}
           value={value}
           placeholder={placeholder}

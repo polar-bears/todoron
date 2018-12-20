@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import Button from './Button'
 import Input from './Input'
 

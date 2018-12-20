@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import Icon from './Icon'
 
 export type ButtonSize = 'small' | 'medium' | 'large'
@@ -68,14 +68,14 @@ const Wrapper = styled.button<{
   borderRadius: theme.borderRadius,
   textAlign: 'center',
   transition: 'background 0.3s, color 0.3s',
-  '&:hover': !disabled && {
+  '&:hover': !disabled ? {
     color: theme.fg,
     background: theme.bgDark,
-  },
-  '&:active': !disabled && {
+  } : '',
+  '&:active': !disabled ? {
     color: theme.fgDark,
     background: theme.bgDarker,
-  },
+  } : '',
 }))
 
 const Content = styled.span(() => ({

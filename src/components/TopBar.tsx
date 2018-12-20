@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 
 export interface ITopBarProps {
   className?: string
@@ -40,11 +40,11 @@ const Wrapper = styled.div(({ theme }) => ({
   boxShadow: theme.boxShadow,
 }))
 
-const Header = styled.div()
+const Header = styled.div({})
 
 const Container = styled.div(() => ({
   flex: '1',
   textAlign: 'center',
 }))
 
-const Footer = styled.div()
+const Footer = styled.div({})

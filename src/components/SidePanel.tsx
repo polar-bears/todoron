@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import ScrollArea from './ScrollArea'
 
 export interface ISidePanelProps {
@@ -55,7 +55,7 @@ const Header = styled.div(({ theme }) => ({
   borderBottom: theme.border,
 }))
 
-const HeaderExtra = styled.div()
+const HeaderExtra = styled.div({})
 
 const StyledScrollArea = styled(ScrollArea)(() => ({
   flex: 1,

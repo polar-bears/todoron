@@ -1,12 +1,14 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 import ScrollArea from './ScrollArea'
 
 export interface IGroupProps {
   className?: string
   header?: React.ReactNode
   footer?: React.ReactNode
+  groupId?: string | number
+  type?: string
 }
 
 export interface IGroupState {
@@ -69,18 +71,20 @@ export default class Group extends React.Component<IGroupProps, IGroupState> {
   }
 
   public render () {
-    const { className, header, children, footer } = this.props
+    const { className, header, children, footer, groupId, type } = this.props
     const { height } = this.state
 
     return (
       <Wrapper
+        data-gid={groupId}
+        data-type={type}
         className={className}
-        innerRef={this.refWrapper}
+        ref={this.refWrapper}
       >
         {header && (
           <Header>{header}</Header>
         )}
-        <Container innerRef={this.refContainer}>
+        <Container ref={this.refContainer}>
           <ScrollArea ref={this.refScrollArea} style={{ height }}>
             {children}
           </ScrollArea>
@@ -105,11 +109,11 @@ const Wrapper = styled.div(({ theme }) => ({
   boxShadow: theme.boxShadow,
 }))
 
-const Header = styled.div()
+const Header = styled.div({})
 
 const Container = styled.div(() => ({
   flex: '1',
-  minHeight: 0,
+  minHeight: 'auto',
 }))
 
-const Footer = styled.div()
+const Footer = styled.div({})

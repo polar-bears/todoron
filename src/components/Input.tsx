@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import styled from '../styles/theme'
+import styled from '../styles/styled-components'
 
 export type InputSize = 'small' | 'medium' | 'large'
 
@@ -76,7 +76,7 @@ export default class Input extends React.Component<IInputProps, IInputState> {
     return (
       <OriginalInput
         className={className}
-        innerRef={this.refInput}
+        ref={this.refInput}
         full={full}
         cSize={size}
         value={value}
