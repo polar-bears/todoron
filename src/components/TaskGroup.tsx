@@ -137,7 +137,7 @@ export default class TaskGroup extends React.Component<ITaskGroupProps, ITaskGro
 
 const Wrapper = styled.div(() => ({
   minHeight: '90px',
-  padding: '0 20px 0 10px',
+  padding: '0 27px 0 10px',
 }))
 
 const Header = styled.div(() => ({

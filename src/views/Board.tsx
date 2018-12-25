@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
+import { Route, RouteComponentProps } from 'react-router'
 import { observer } from 'mobx-react'
+import { Switch } from 'react-router-dom'
 
 import Group from '../components/Group'
 import GroupAddition from '../components/GroupAddition'
@@ -9,6 +10,7 @@ import Sortable from '../components/Sortable'
 import TagContext from '../components/TagContext'
 import TaskGroup from '../components/TaskGroup'
 import styled from '../styles/styled-components'
+import TaskView from './TaskView'
 import { boardStore, taskStore } from '../stores'
 import { IGroup, ISortable, ITask } from '../models'
 
@@ -161,6 +163,9 @@ export default class Board extends React.Component<IProps, IState> {
             <Group header={<GroupAddition onConfirm={this.onAddGroup} />} />
           </Container>
         </ScrollArea>
+        <Switch>
+          <Route path='/boards/:boardId/task/:taskId' component={TaskView}/>
+        </Switch>
       </TagContext.Provider>
     )
   }
