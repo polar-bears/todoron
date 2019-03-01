@@ -1,23 +1,28 @@
-import * as React from 'react'
-import styled from 'styled-components'
+import React, { useState } from 'react'
+import styled, { ThemeProvider } from 'styled-components'
 import { createBrowserHistory } from 'history'
 import { Router } from 'react-router'
 
 import MainView from './views/MainView'
 import { GlobalStyles } from './styles'
+import { lightTheme } from './styles/theme'
 
 const history = createBrowserHistory()
 
 export interface Props {}
 
 export default function App (props: Props) {
+  const [theme] = useState(lightTheme)
+
   return (
-    <Router history={history}>
-      <Wrapper>
-        <MainView />
-        <GlobalStyles />
-      </Wrapper>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
+        <Wrapper>
+          <MainView />
+          <GlobalStyles />
+        </Wrapper>
+      </Router>
+    </ThemeProvider>
   )
 }
 
