@@ -17,13 +17,11 @@ export default function App (props: Props) {
   return (
     <ThemeProvider theme={theme}>
       <Router history={history}>
-        <Wrapper>
+        <>
           <MainView />
           <GlobalStyles />
-        </Wrapper>
+        </>
       </Router>
     </ThemeProvider>
   )
 }
-
-const Wrapper = styled.div``
