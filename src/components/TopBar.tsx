@@ -2,18 +2,16 @@ import * as React from 'react'
 
 import styled from '../styles/styled-components'
 
-export interface ITopBarProps {
+export interface Props {
   className?: string
   header?: React.ReactNode
   footer?: React.ReactNode
+  children?: React.ReactNode
 }
 
-const TopBar: React.SFC<ITopBarProps> = ({
-  className,
-  header,
-  footer,
-  children
-}) => {
+export default function TopBar (props: Props) {
+  const { className, header, footer, children } = props
+
   return (
     <Wrapper className={className}>
       <Header>{header}</Header>
@@ -22,8 +20,6 @@ const TopBar: React.SFC<ITopBarProps> = ({
     </Wrapper>
   )
 }
-
-export default TopBar
 
 const Wrapper = styled.div(({ theme }) => ({
   position: 'absolute',
