@@ -1,35 +1,54 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 import Icon from './Icon'
 import { IBoard } from '../models'
 
-export interface IBoardItemProps {
+export interface Props {
   className?: string
   active?: boolean
   board: IBoard
   onClick?: (board: IBoard) => void
+  onDelete?: (boardId: number) => void
+  onEdit?: (boardId: number) => void
 }
 
-const BoardItem: React.SFC<IBoardItemProps> = ({
-  className,
-  board,
-  active = false,
-  onClick
-}) => {
+export default function BoardItem (props: Props) {
+  const {
+    className,
+    board,
+    active = false,
+    onClick = noop,
+    onDelete = noop,
+    onEdit = noop
+  } = props
+
+  const onBoardClick = () => {
+    onClick(board)
+  }
+
+  const onBoardEdit = (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    onEdit()
+  }
+
+  const onBoardDelete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    onDelete()
+  }
+
   return (
-    <Wrapper
-      className={className}
-      active={active}
-      onClick={() => onClick && onClick(board)}
-    >
+    <Wrapper className={className} active={active} onClick={onBoardClick}>
       <StyledIcon name='Inbox' />
       <Content>{board.title}</Content>
+      <EditIcon name='Edit2' onClick={onBoardEdit} />
+      <DelIcon name='Trash2' onClick={onBoardDelete} />
     </Wrapper>
   )
 }
-
-export default BoardItem
 
 const Wrapper = styled.div<{ active: boolean }>(({ theme, active }) => ({
   marginBottom: '8px',
@@ -53,6 +72,21 @@ const Wrapper = styled.div<{ active: boolean }>(({ theme, active }) => ({
 
 const StyledIcon = styled(Icon)(({ theme }) => ({
   color: theme.fgLight
+}))
+
+const EditIcon = styled(Icon)(({ theme }) => ({
+  color: theme.fgLight,
+  marginRight: '10px',
+  '&:hover': {
+    color: theme.colors.green
+  }
+}))
+
+const DelIcon = styled(Icon)(({ theme }) => ({
+  color: theme.fgLight,
+  '&:hover': {
+    color: theme.colors.red
+  }
 }))
 
 const Content = styled.div(() => ({
