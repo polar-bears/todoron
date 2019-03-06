@@ -2,35 +2,37 @@ import * as React from 'react'
 
 import styled from '../styles/styled-components'
 import Icon from './Icon'
+import noop from './../libs/noop'
 
-export interface ITagProps {
+export interface Props {
   className?: string
   color: string
   checked?: boolean
+  children?: React.ReactNode
   onChange?: (checked: boolean) => void
 }
 
-const Tag: React.SFC<ITagProps> = ({
-  checked,
-  onChange,
-  className,
-  color,
-  children
-}) => {
+export default function Tag (props: Props) {
+  const { checked = true, className, color, children, onChange = noop } = props
+
+  const onTagClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    onChange(!checked)
+  }
+
   return (
     <Wrapper
       className={className}
       color={color}
-      checkable={checked !== undefined}
-      onClick={() => checked !== undefined && onChange && onChange(!checked)}
+      checkable={checked}
+      onClick={onTagClick}
     >
       {checked === true && <StyledIcon name='Check' />}
       {children}
     </Wrapper>
   )
 }
-
-export default Tag
 
 const Wrapper = styled.div<{
   checkable: boolean
