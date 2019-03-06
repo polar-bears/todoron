@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 
 export type InputSize = 'small' | 'medium' | 'large'
 
-export interface IInputProps {
+export interface Props {
   className?: string
   value?: string
   size?: InputSize
@@ -18,32 +19,49 @@ export interface IInputProps {
   onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-const Input = (props: IInputProps) => {
+export default function Input (props: Props) {
   const {
     className,
     value,
     placeholder,
+    full = true,
     disabled = false,
-    full = false,
+    autoFocus = false,
     size = 'medium',
-    autoFocus,
-    onChange,
-    onBlur,
-    onKeyUp,
-    onEnter
+    onChange = noop,
+    onBlur = noop,
+    onKeyUp = noop,
+    onEnter = noop
   } = props
-  const refInput: React.RefObject<HTMLInputElement> = useRef(null)
 
-  if (autoFocus && refInput.current) {
-    refInput.current.focus()
+  const refInput: React.RefObject<HTMLInputElement> = React.useRef(null)
+
+  React.useEffect(() => {
+    if (autoFocus && refInput.current) {
+      refInput.current.focus()
+    }
+  }, [autoFocus])
+
+  const onInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
+
+    onChange(e.target.value, e)
   }
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (disabled) return
+  const onInputBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
 
-    if (onKeyUp) onKeyUp(e)
+    onBlur(e.target.value, e)
+  }
 
-    if (onEnter && e.keyCode === 13) onEnter(e)
+  const onInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.stopPropagation()
+
+    if (e.keyCode === 13) {
+      onEnter(e)
+    } else {
+      onKeyUp(e)
+    }
   }
 
   return (
@@ -55,18 +73,12 @@ const Input = (props: IInputProps) => {
       value={value}
       placeholder={placeholder}
       disabled={disabled}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        !disabled && onChange && onChange(e.target.value, e)
-      }
-      onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
-        !disabled && onBlur && onBlur(e.target.value, e)
-      }
-      onKeyDown={onKeyDown}
+      onChange={onInputValueChange}
+      onBlur={onInputBlur}
+      onKeyUp={onInputKeyUp}
     />
   )
 }
-
-export default Input
 
 const sizes = {
   small: {
