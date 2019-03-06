@@ -3,20 +3,17 @@ import * as React from 'react'
 import styled from '../styles/styled-components'
 import ScrollArea from './ScrollArea'
 
-export interface ISidePanelProps {
+export interface Props {
   className?: string
   header?: React.ReactNode
   headerExtra?: React.ReactNode
   expanded?: boolean
+  children?: React.ReactNode
 }
 
-const SidePanel: React.SFC<ISidePanelProps> = ({
-  className,
-  header,
-  headerExtra,
-  children,
-  expanded = false
-}) => {
+export default function SidePanel (props: Props) {
+  const { className, header, headerExtra, expanded = false, children } = props
+
   return (
     <Wrapper className={className} expanded={expanded}>
       {header && <Header>{header}</Header>}
@@ -27,7 +24,6 @@ const SidePanel: React.SFC<ISidePanelProps> = ({
     </Wrapper>
   )
 }
-export default SidePanel
 
 const Wrapper = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   display: 'flex',
@@ -54,7 +50,7 @@ const Header = styled.div(({ theme }) => ({
 
 const HeaderExtra = styled.div({})
 
-const StyledScrollArea = styled(ScrollArea)(() => ({
+const StyledScrollArea = styled.div(() => ({
   flex: 1
 }))
 
