@@ -1,45 +1,51 @@
 import * as React from 'react'
 
 import styled from '../styles/styled-components'
+import noop from './../libs/noop'
 import Icon from './Icon'
 
 export type ButtonSize = 'small' | 'medium' | 'large'
 
-export interface IButtonProps {
+export interface Props {
   className?: string
   size?: ButtonSize
   full?: boolean
   disabled?: boolean
   icon?: string
+  children?: React.ReactNode
   onClick?: React.MouseEventHandler
 }
 
-const Button: React.SFC<IButtonProps> = ({
-  className,
-  icon,
-  disabled = false,
-  full = false,
-  size = 'medium',
-  onClick,
-  children
-}) => {
+export default function Button (props: Props) {
+  const {
+    className,
+    icon,
+    disabled = false,
+    full = false,
+    size = 'medium',
+    children,
+    onClick = noop
+  } = props
+
+  const onButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+
+    onClick(e)
+  }
+
   return (
     <Wrapper
       className={className}
       full={full}
       size={size}
       disabled={disabled}
-      onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-        !disabled && onClick && onClick(e)
-      }
+      onClick={onButtonClick}
     >
       <Icon name={icon} size={size} />
       {children && <Content>{children}</Content>}
     </Wrapper>
   )
 }
-
-export default Button
 
 const sizes = {
   small: {
@@ -81,15 +87,15 @@ const Wrapper = styled.button<{
   transition: 'background 0.3s, color 0.3s',
   '&:hover': !disabled
     ? {
-        color: theme.fg,
-        background: theme.bgDark
-      }
+      color: theme.fg,
+      background: theme.bgDark
+    }
     : '',
   '&:active': !disabled
     ? {
-        color: theme.fgDark,
-        background: theme.bgDarker
-      }
+      color: theme.fgDark,
+      background: theme.bgDarker
+    }
     : ''
 }))
 
