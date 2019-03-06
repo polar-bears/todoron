@@ -2,13 +2,13 @@ import * as React from 'react'
 
 import styled from '../styles/styled-components'
 
-export interface ILogoProps {
+export interface Props {
   className?: string
 }
 
-const Logo: React.SFC<ILogoProps> = ({ className }) => {
+export default function Logo (props: Props) {
   return (
-    <Wrapper className={className}>
+    <Wrapper className={props.className}>
       <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 150'>
         <g>
           <g>
@@ -22,8 +22,6 @@ const Logo: React.SFC<ILogoProps> = ({ className }) => {
     </Wrapper>
   )
 }
-
-export default Logo
 
 const Wrapper = styled.span(({ theme }) => ({
   fill: theme.bgDarker,
