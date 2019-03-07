@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { RouteComponentProps } from 'react-router'
+import { Redirect, Route, RouteComponentProps, Switch } from 'react-router'
+import { observer } from 'mobx-react-lite'
 
 import BoardItem from '../components/BoardItem'
 import Button from '../components/Button'
@@ -7,18 +8,31 @@ import Icon from '../components/Icon'
 import Input from '../components/Input'
 import Logo from '../components/Logo'
 import SidePanel from '../components/SidePanel'
-import TextArea from '../components/Textarea'
 import TopBar from '../components/TopBar'
 import styled from '../styles/styled-components'
-import { boardStore } from '../stores'
+import BoardView from './BoardView'
+import { default as BoardStore } from '../stores/BoardStore'
+import { IBoard } from '../models'
 
 export interface Props extends RouteComponentProps<{}> {}
 
-export default function MainView (props: Props) {
+export default observer(function MainView (props: Props) {
+  const store = React.useContext(BoardStore)
+  let { boards, selectedBoard: board } = store
+
   const [expanded, setExpanded] = React.useState(false)
   const [editing, setEditing] = React.useState(false)
   const [focused, setFocused] = React.useState(false)
+  const [boardEditing, setBoardEditing] = React.useState(false)
   const [addingTitle, setAddingTitle] = React.useState('')
+
+  React.useEffect(() => {
+    store.listBoards()
+    const id = Number(props.location.pathname.substr(8))
+    if (!isNaN(id)) {
+      store.selectBoard(id)
+    }
+  }, [])
 
   const onToggleSidePanel = React.useCallback(() => {
     setExpanded(!expanded)
@@ -30,25 +44,72 @@ export default function MainView (props: Props) {
     setAddingTitle('')
   }, [editing, focused])
 
-  const onAddingTitleChange = React.useCallback((value: string) => {
-    setAddingTitle(value)
-  }, [addingTitle])
+  const onAddingTitleChange = React.useCallback(
+    (value: string) => {
+      setAddingTitle(value)
+    },
+    []
+  )
 
   const onAddingConfirm = React.useCallback(async () => {
-    await boardStore.addBoard(addingTitle.trim())
+    if (addingTitle.trim() === '') return
+
     setEditing(false)
+    setFocused(false)
     setAddingTitle('')
-  }, [editing, addingTitle])
+    await store.addBoard(addingTitle.trim())
+    props.history.push(`/boards/${store.selectedId}`)
+  }, [addingTitle])
 
-  const { boards, selectedBoard: board } = boardStore
+  const onBoardClick = React.useCallback((selectedBoard: IBoard) => {
+    store.selectBoard(selectedBoard.id)
+    props.history.push(`/boards/${selectedBoard.id}`)
+  }, [])
 
-  const onBoardClick = React.useCallback(() => {
-    props.history.push(`/boards/${board!.id}`)
-  }, [board])
+  const onBoardEdit = React.useCallback(
+    (boardId: number, newValue: string) => {
+      if (newValue === '') {
+        setBoardEditing(!boardEditing)
 
-  React.useEffect(() => { boardStore.listBoards() }, [boardStore])
+        return
+      }
+      setBoardEditing(!boardEditing)
+      store.updateBoard(boardId, { title: newValue })
+    },
+    [boardEditing]
+  )
 
-  if (!boards) return null
+  const onBoardDel = React.useCallback((boardId: number) => {
+    if (store.boards.length === 1) return
+
+    const index = store.boards.findIndex((b) => b.id === boardId)
+    // console.log('index', index, boardId)
+    let id
+    if (index === 0) {
+      id = store.boards[index + 1].id
+      store.selectBoard(id)
+      // console.log(store.boards[index + 1].id, 'index === 0')
+    } else if (index === (store.boards.length - 1)) {
+      id = store.boards[index - 1].id
+      store.selectBoard(id)
+      // console.log(id, 'index === store.boards.length')
+    } else {
+      id = store.boards[index + 1].id
+      store.selectBoard(id)
+      // console.log(id, 'lll')
+    }
+
+    store.removeBoard(boardId)
+    props.history.push(`/boards/${id}`)
+  }, [])
+
+  const onToggleEditBoard = React.useCallback(() => {
+    setBoardEditing(!boardEditing)
+  }, [boardEditing])
+
+  if ((boards && boards.length <= 0) || !board) {
+    return null
+  }
 
   return (
     <Wrapper>
@@ -98,19 +159,26 @@ export default function MainView (props: Props) {
             <BoardItem
               key={b.id}
               board={b}
-              active={!!board && board.id === b.id}
+              active={board!.id === b.id}
+              editing={boardEditing && board!.id === b.id}
               onClick={onBoardClick}
+              onEdit={onBoardEdit}
+              onDelete={onBoardDel}
+              onToggleEditBoard={onToggleEditBoard}
             />
           ))}
         </SidePanel>
-        {/* <Switch>
-          <Route path='/boards/:boardId' component={Board} />
-          <Redirect to={`/boards/${boards[0].id}`} />
-        </Switch> */}
+        <Switch>
+          <Route
+            path='/boards/:boardId'
+            component={(routeProps: any) => <BoardView {...routeProps} />}
+          />
+          <Redirect to={`/boards/${board!.id}`} />
+        </Switch>
       </Container>
     </Wrapper>
   )
-}
+})
 
 const Wrapper = styled.div(({ theme }) => ({
   position: 'relative',
@@ -132,10 +200,10 @@ const SidePanelTitle = styled.div(() => ({
 }))
 
 const Addition = styled.div<{ visible: boolean }>(({ theme, visible }) => ({
-  marginTop: visible ? 0 : '-1px',
   padding: '0 15px',
-  display: 'flex',
   alignItems: 'center',
+  marginTop: visible ? 0 : '-1px',
+  display: visible ? 'flex' : 'none',
   height: visible ? '36px' : 0,
   borderBottom: theme.border,
   overflow: visible ? 'visible' : 'hidden',

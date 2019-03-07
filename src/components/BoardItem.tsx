@@ -4,14 +4,17 @@ import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 import Icon from './Icon'
 import { IBoard } from '../models'
+import Input from './Input'
 
 export interface Props {
   className?: string
   active?: boolean
+  editing?: boolean
   board: IBoard
+  onToggleEditBoard?: () => void
   onClick?: (board: IBoard) => void
   onDelete?: (boardId: number) => void
-  onEdit?: (boardId: number) => void
+  onEdit?: (boardId: number, newValue: string) => void
 }
 
 export default function BoardItem (props: Props) {
@@ -19,33 +22,55 @@ export default function BoardItem (props: Props) {
     className,
     board,
     active = false,
+    editing = false,
     onClick = noop,
     onDelete = noop,
-    onEdit = noop
+    onEdit = noop,
+    onToggleEditBoard = noop
   } = props
+
+  const [value, setValue] = React.useState(board.title)
 
   const onBoardClick = () => {
     onClick(board)
   }
 
-  const onBoardEdit = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const onBoardEditing = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
-    onEdit()
+    let newBoardName = e.currentTarget.value
+
+    if (newBoardName !== '') { board.title = newBoardName }
+
+    onEdit(board.id, newBoardName)
   }
 
-  const onBoardDelete = (e: React.MouseEvent) => {
+  const onBoardDelete = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
+    onDelete(board.id)
+  }, [])
 
-    onDelete()
-  }
+  const onValueChange = React.useCallback((newValue: string) => {
+    setValue(newValue)
+  }, [])
 
   return (
     <Wrapper className={className} active={active} onClick={onBoardClick}>
       <StyledIcon name='Inbox' />
-      <Content>{board.title}</Content>
-      <EditIcon name='Edit2' onClick={onBoardEdit} />
-      <DelIcon name='Trash2' onClick={onBoardDelete} />
+      {editing ? (
+        <StyledInput
+          autoFocus
+          value={value}
+          onEnter={onBoardEditing}
+          onBlur={onToggleEditBoard}
+          onChange={onValueChange}
+        />
+      ) : (
+        <React.Fragment>
+          <Content>{board.title}</Content>
+          <EditIcon name='Edit2' onClick={onToggleEditBoard} />
+          <DelIcon name='Trash2' onClick={onBoardDelete} />
+        </React.Fragment>
+      )}
     </Wrapper>
   )
 }
@@ -67,6 +92,13 @@ const Wrapper = styled.div<{ active: boolean }>(({ theme, active }) => ({
   '&:hover': {
     color: active ? theme.fgDark : theme.fg,
     background: active ? theme.bgDark : theme.bg
+  }
+}))
+
+const StyledInput = styled(Input)(({ theme }) => ({
+  flex: 1,
+  '&:focus': {
+    background: theme.bgDark
   }
 }))
 
