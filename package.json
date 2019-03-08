@@ -9,7 +9,8 @@
     "electron"
   ],
   "scripts": {
-    "start": "parcel index.html"
+    "start": "parcel index.html",
+    "build": "parcel build index.html --public-url /todoron/"
   },
   "description": "An efficient and lightweight to-do app.",
   "repository": {
