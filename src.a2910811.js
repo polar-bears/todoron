@@ -1566,4 +1566,4 @@ var n=arguments[3];function t(n){return(t="function"==typeof Symbol&&"symbol"==t
 },{"react":"HdMw","styled-components":"B2XS","history":"FSXw","react-router":"PPtk","./views/MainView":"xk7l","./styles/reset":"Nvn1","./styles/theme":"ynDj"}],"OGgv":[function(require,module,exports) {
 "use strict";var e=o(require("react")),r=o(require("react-dom")),t=n(require("./App"));function n(e){return e&&e.__esModule?e:{default:e}}function o(e){if(e&&e.__esModule)return e;var r={};if(null!=e)for(var t in e)if(Object.prototype.hasOwnProperty.call(e,t)){var n=Object.defineProperty&&Object.getOwnPropertyDescriptor?Object.getOwnPropertyDescriptor(e,t):{};n.get||n.set?Object.defineProperty(r,t,n):r[t]=e[t]}return r.default=e,r}r.render(e.createElement(t.default,null),document.getElementById("root"));
 },{"react":"HdMw","react-dom":"X9zx","./App":"Ru8j"}]},{},["OGgv"], null)
-//# sourceMappingURL=https://polar-bears.github.io/todoron/src.9ab2319b.map
+//# sourceMappingURL=/todoron/src.9ab2319b.map
