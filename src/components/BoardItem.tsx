@@ -31,18 +31,18 @@ export default function BoardItem (props: Props) {
 
   const [value, setValue] = React.useState(board.title)
 
-  const onBoardClick = () => {
+  const onBoardClick = React.useCallback(() => {
     onClick(board)
-  }
+  }, [])
 
-  const onBoardEditing = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onBoardEditing = React.useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
 
     let newBoardName = e.currentTarget.value
 
     if (newBoardName !== '') { board.title = newBoardName }
 
     onEdit(board.id, newBoardName)
-  }
+  }, [])
 
   const onBoardDelete = React.useCallback((e: React.MouseEvent) => {
     e.stopPropagation()

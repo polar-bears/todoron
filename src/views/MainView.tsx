@@ -83,20 +83,16 @@ export default observer(function MainView (props: Props) {
     if (store.boards.length === 1) return
 
     const index = store.boards.findIndex((b) => b.id === boardId)
-    // console.log('index', index, boardId)
     let id
     if (index === 0) {
       id = store.boards[index + 1].id
       store.selectBoard(id)
-      // console.log(store.boards[index + 1].id, 'index === 0')
     } else if (index === (store.boards.length - 1)) {
       id = store.boards[index - 1].id
       store.selectBoard(id)
-      // console.log(id, 'index === store.boards.length')
     } else {
       id = store.boards[index + 1].id
       store.selectBoard(id)
-      // console.log(id, 'lll')
     }
 
     store.removeBoard(boardId)

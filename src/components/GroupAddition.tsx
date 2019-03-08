@@ -1,24 +1,23 @@
 import * as React from 'react'
-import { useState } from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 import Button from './Button'
 import Input from './Input'
 
-export interface IGroupAdditionProps {
+export interface Props {
   onConfirm?: (value: string, reset: () => void) => void
 }
 
-export interface IGroupAdditionState {
-  editing: boolean
-  value: string
-}
+export default function GroupAddition (props: Props) {
+  const { onConfirm = noop } = props
 
-function GroupAddition(props: IGroupAdditionProps) {
-  const { onConfirm } = props
+  const [editing, setEditing] = React.useState(false)
+  const [value, setValue] = React.useState('')
 
-  const [editing, setEditing] = useState(false)
-  const [value, setValue] = useState('')
+  const onInputValue = (newVal: string) => {
+    setValue(newVal)
+  }
 
   const confirm = () => {
     if (value.trim() && onConfirm) {
@@ -43,28 +42,35 @@ function GroupAddition(props: IGroupAdditionProps) {
             value={value}
             placeholder='Group Name'
             onEnter={confirm}
+            onChange={onInputValue}
           />
           <Button icon='Check' onClick={confirm} />
           <Button icon='X' onClick={onToggle} />
         </Container>
       ) : (
-        <Button full size='large' onClick={onToggle}>
+        <AddButton full size='large' onClick={onToggle}>
           Add Group
-        </Button>
+        </AddButton>
       )}
     </Wrapper>
   )
 }
 
-export default GroupAddition
-
 const Wrapper = styled.div(() => ({
-  width: '100%'
+  width: '300px'
 }))
 
-const Container = styled.div(() => ({
+const Container = styled.div(({ theme }) => ({
+  background: theme.bg,
+  marginRight: '10px',
+  verticalAlign: 'top',
   display: 'flex',
   input: {
     flex: 1
   }
+}))
+
+const AddButton = styled(Button)(({ theme }) => ({
+  background: theme.bg,
+  boxShadow: theme.boxShadow
 }))

@@ -44,8 +44,8 @@ export class TaskStore {
   }
 
   @action
-  public async moveGroup (boardId: number, fromIndex: number, toIndex: number) {
-    await db.moveGroup(boardId, fromIndex, toIndex)
+  public moveGroup (boardId: number, fromIndex: number, toIndex: number) {
+    db.moveGroup(boardId, fromIndex, toIndex)
     this.groups = reorder(this.groups, fromIndex, toIndex)
   }
 
@@ -83,13 +83,13 @@ export class TaskStore {
   }
 
   @action
-  public async moveTask (
+  public moveTask (
     fromGroupId: number,
     toGroupId: number,
     fromIndex: number,
     toIndex: number
   ) {
-    await db.moveTask(fromGroupId, toGroupId, fromIndex, toIndex)
+    db.moveTask(fromGroupId, toGroupId, fromIndex, toIndex)
 
     this.groups = reorderBetween(
       this.groups,

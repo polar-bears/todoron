@@ -1,7 +1,6 @@
 import * as React from 'react'
 
 import styled from '../styles/styled-components'
-import ScrollArea from './ScrollArea'
 
 export interface Props {
   className?: string
@@ -18,9 +17,7 @@ export default function SidePanel (props: Props) {
     <Wrapper className={className} expanded={expanded}>
       {header && <Header>{header}</Header>}
       {headerExtra && <HeaderExtra>{headerExtra}</HeaderExtra>}
-      <StyledScrollArea>
-        <Container>{children}</Container>
-      </StyledScrollArea>
+      <Container>{children}</Container>
     </Wrapper>
   )
 }
@@ -50,10 +47,8 @@ const Header = styled.div(({ theme }) => ({
 
 const HeaderExtra = styled.div({})
 
-const StyledScrollArea = styled.div(() => ({
-  flex: 1
-}))
-
 const Container = styled.div(() => ({
-  padding: '15px'
+  padding: '15px',
+  overflow: 'auto',
+  flex: 1
 }))

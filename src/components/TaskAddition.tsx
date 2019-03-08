@@ -13,11 +13,11 @@ export type ConfirmData = {
   content: string
 }
 
-export interface ITaskAdditionContext {
+export interface ContextProps {
   tags: ITag[]
 }
 
-export interface ITaskAdditionProps {
+export interface Props {
   groupId: number
   onConfirm?: (
     data: ConfirmData,
@@ -26,26 +26,19 @@ export interface ITaskAdditionProps {
   ) => void
 }
 
-export interface ITaskAdditionState {
-  editing: boolean
-  content: string
-}
-
-function OriginalTaskAddition(
-  props: ITaskAdditionProps & ITaskAdditionContext
-) {
+function OriginalTaskAddition (props: Props & ContextProps) {
   const { groupId, onConfirm } = props
 
   const [editing, setEditing] = useState(false)
   const [content, setContent] = useState('')
 
-  const reset = (editing: boolean = false) => {
+  const reset = (newEditing: boolean = false) => {
     setContent('')
-    setEditing(editing)
+    setEditing(newEditing)
   }
 
-  const onContentChange = (content: string) => {
-    setContent(content)
+  const onContentChange = (newContent: string) => {
+    setContent(newContent)
   }
 
   const onToggle = () => {
@@ -57,11 +50,16 @@ function OriginalTaskAddition(
     if (content.trim() && onConfirm) {
       onConfirm({ groupId, content }, reset, false)
     }
+    setContent('')
+    setEditing(!editing)
   }
 
-  const onKeyUp = (e: React.KeyboardEvent<any>) => {
+  const onTextareaKeyUp = (
+    value: string,
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     if (e.keyCode === 13 && e.ctrlKey && content.trim() && onConfirm) {
-      onConfirm({ groupId, content: content.trim() }, reset, true)
+      onConfirm({ groupId, content: value.trim() }, reset, true)
     }
   }
 
@@ -82,7 +80,7 @@ function OriginalTaskAddition(
         value={content}
         placeholder='Task Content'
         onChange={onContentChange}
-        onKeyUp={onKeyUp}
+        onKeyUp={onTextareaKeyUp}
       />
       <Actions>
         <Button size='small' icon='Check' onClick={confirm} />
@@ -108,7 +106,7 @@ function OriginalTaskAddition(
   )
 }
 
-export default function TaskAddition(props: ITaskAdditionProps) {
+export default function TaskAddition (props: Props) {
   return (
     <TagContext.Consumer>
       {(context) => <OriginalTaskAddition {...context} {...props} />}
@@ -117,7 +115,8 @@ export default function TaskAddition(props: ITaskAdditionProps) {
 }
 
 const StyledCard = styled.div(() => ({
-  margin: '10px'
+  margin: '10px 10px 0 10px',
+  paddingBottom: '10px'
 }))
 
 const Actions = styled.div(() => ({

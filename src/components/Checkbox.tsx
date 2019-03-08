@@ -1,34 +1,33 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 
-export interface ICheckboxProps {
+export interface Props {
   className?: string
   checked?: boolean
+  children?: React.ReactNode
   onChange?: (checked: boolean) => void
 }
 
-const Checkbox: React.SFC<ICheckboxProps> = ({
-  className,
-  checked = false,
-  onChange,
-  children
-}) => {
+export default function Checkbox (props: Props) {
+  const { className, children, checked = false, onChange = noop } = props
+
+  const onCheckbox = () => onChange(!checked)
+
   return (
     <Wrapper className={className}>
       <OriginalCheckbox
-        checked={checked}
         type='checkbox'
-        onChange={() => onChange && onChange(!checked)}
+        checked={checked}
+        onChange={onCheckbox}
       />
       <Content>{children}</Content>
     </Wrapper>
   )
 }
 
-export default Checkbox
-
-const Wrapper = styled.label(({ theme }) => ({
+const Wrapper = styled.label(() => ({
   verticalAlign: 'middle',
   userSelect: 'none',
   cursor: 'pointer'

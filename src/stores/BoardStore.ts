@@ -12,7 +12,9 @@ export class BoardStore {
 
   @computed
   public get selectedBoard () {
-    if (!this.selectedId && this.boards.length > 0) return this.boards[0]
+    if (!this.selectedId && this.boards.length > 0) {
+      return this.boards[0]
+    }
 
     return this.boards.find((board) => board.id === this.selectedId)
   }
@@ -26,6 +28,7 @@ export class BoardStore {
   public async addBoard (title: string) {
     const board = await db.addBoard(title)
     this.boards = addOne(this.boards, board, true)
+    this.selectBoard(board.id)
   }
 
   @action
@@ -40,6 +43,7 @@ export class BoardStore {
   @action
   public async removeBoard (boardId: number) {
     await db.removeBoard(boardId)
+
     this.boards = removeById(this.boards, boardId)
   }
 

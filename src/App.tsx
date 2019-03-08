@@ -1,26 +1,29 @@
-import React, { useState } from 'react'
-import styled, { ThemeProvider } from 'styled-components'
+import * as React from 'react'
+import { ThemeProvider } from 'styled-components'
 import { createBrowserHistory } from 'history'
-import { Router } from 'react-router'
+import { Route, Router } from 'react-router'
 
 import MainView from './views/MainView'
-import { GlobalStyles } from './styles'
+import { GlobalStyles } from './styles/reset'
 import { lightTheme } from './styles/theme'
+
+// import 'github-markdown-css'
+// import 'highlight.js/styles/solarized-light.css'
 
 const history = createBrowserHistory()
 
 export interface Props {}
 
 export default function App (props: Props) {
-  const [theme] = useState(lightTheme)
+  const [theme] = React.useState(lightTheme)
 
   return (
     <ThemeProvider theme={theme}>
       <Router history={history}>
-        <>
-          <MainView />
+        <React.Fragment>
+          <Route component={(routeProps: any) => <MainView {...routeProps}/>} />
           <GlobalStyles />
-        </>
+        </React.Fragment>
       </Router>
     </ThemeProvider>
   )

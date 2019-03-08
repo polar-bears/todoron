@@ -1,12 +1,14 @@
 import * as hljs from 'highlight.js'
 import React, { useEffect, useRef } from 'react'
 
-interface IProps {
+interface Props {
   value: string
   language: string
 }
 
-const CodeBlock: React.SFC<IProps> = ({ language, value }) => {
+export default function CodeBlock (props: Props) {
+  const { language, value } = props
+
   const refCode: React.RefObject<HTMLElement> = useRef(null)
 
   useEffect(() => {
@@ -23,5 +25,3 @@ const CodeBlock: React.SFC<IProps> = ({ language, value }) => {
     </pre>
   )
 }
-
-export default CodeBlock

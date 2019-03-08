@@ -5,7 +5,7 @@ import styled from '../styles/styled-components'
 
 export interface Props {
   className?: string
-  defaultValue?: string
+  value?: string
   disabled?: boolean
   autoFocus?: boolean
   placeholder?: string
@@ -18,9 +18,9 @@ export interface Props {
 export default function TextArea (props: Props) {
   const {
     className,
-    defaultValue = '',
     placeholder,
     limit,
+    value,
     rows,
     disabled = false,
     autoFocus = false,
@@ -30,22 +30,21 @@ export default function TextArea (props: Props) {
 
   const refTextArea: React.RefObject<HTMLTextAreaElement> = React.useRef(null)
 
-  const [value, setValue] = React.useState('')
-
-  if (autoFocus && refTextArea.current) {
-    refTextArea.current.focus()
-  }
+  React.useEffect(() => {
+    if (autoFocus && refTextArea.current) {
+      refTextArea.current.focus()
+    }
+  }, [autoFocus])
 
   const onValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     let newVal = e.target.value
-    if (limit !== undefined) newVal = value.substring(0, limit)
 
-    setValue(newVal)
+    if (limit && !isNaN(limit)) newVal = newVal.substring(0, limit)
 
     onChange(newVal, e)
   }
 
-  const onTextAreaKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onTextareaKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     onKeyUp(e.currentTarget.value, e)
   }
 
@@ -55,16 +54,15 @@ export default function TextArea (props: Props) {
         className={className}
         ref={refTextArea}
         rows={rows}
-        defaultValue={defaultValue}
         value={value}
         placeholder={placeholder}
         disabled={disabled}
         onChange={onValueChange}
-        onKeyUp={onTextAreaKeyUp}
+        onKeyUp={onTextareaKeyUp}
       />
       {limit !== undefined && (
         <Count>
-          {value.length} / {limit}
+          {value!.length || 0} / {limit}
         </Count>
       )}
     </Wrapper>

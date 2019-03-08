@@ -22,8 +22,8 @@ export interface Props {
 export default function Input (props: Props) {
   const {
     className,
-    value,
     placeholder,
+    value,
     full = true,
     disabled = false,
     autoFocus = false,
@@ -43,20 +43,14 @@ export default function Input (props: Props) {
   }, [autoFocus])
 
   const onInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation()
-
     onChange(e.target.value, e)
   }
 
   const onInputBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation()
-
     onBlur(e.target.value, e)
   }
 
   const onInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    e.stopPropagation()
-
     if (e.keyCode === 13) {
       onEnter(e)
     } else {
