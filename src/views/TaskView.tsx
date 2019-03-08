@@ -7,8 +7,6 @@ import { observer } from 'mobx-react-lite'
 import Button from '../components/Button'
 import Checkbox from '../components/Checkbox'
 import CodeBlock from '../components/CodeBlock'
-import Input from '../components/Input'
-import ScrollArea from '../components/ScrollArea'
 import Textarea from '../components/Textarea'
 import styled from '../styles/styled-components'
 import { default as TaskStore } from '../stores/TaskStore'
@@ -42,20 +40,26 @@ export default observer(function TaskView (props: Props) {
     props.history.push(`/boards/${props.match.params.boardId}`)
   }, [])
 
-  const onCheckboxChange = React.useCallback((finished: boolean) => {
-    taskStore.updateTask(task!.id, { finished })
-  }, [taskId])
+  const onCheckboxChange = React.useCallback(
+    (finished: boolean) => {
+      taskStore.updateTask(task!.id, { finished })
+    },
+    [taskId]
+  )
 
-  const onContentChange = React.useCallback((newContent: string) => {
-    setContent(newContent)
-  }, [content])
+  const onContentChange = React.useCallback(
+    (newContent: string) => {
+      setContent(newContent)
+    },
+    [content]
+  )
 
   const onEditable = React.useCallback(() => {
     setEditable(true)
   }, [editable])
 
   const onTaskSave = React.useCallback(async () => {
-    if (!content || (content === taskStore.selectedTask!.content)) {
+    if (!content || content === taskStore.selectedTask!.content) {
       setEditable(false)
       return
     }
@@ -68,45 +72,43 @@ export default observer(function TaskView (props: Props) {
 
   return (
     <Wrapper>
-      <ScrollArea>
-        <Mask onClick={onClose} ref={wrapper} />
-        <Container editable={editable}>
-          <Header>
-            <Title>
-              <Checkbox checked={task.finished} onChange={onCheckboxChange} />
-              <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
-            </Title>
-          </Header>
-          <Content>
-            {editable ? (
-              <React.Fragment>
-                <EditArea onChange={onContentChange} value={content} />
-                <SaveButton onClick={onTaskSave}>save</SaveButton>
-              </React.Fragment>
-            ) : (
-              <React.Fragment>
-                <Markdown
-                  source={task.content}
-                  className='markdown-body'
-                  allowNode={() => true}
-                  escapeHtml={false}
-                  skipHtml={false}
-                  renderers={{ code: CodeBlock }}
-                />
-                <EditButton onClick={onEditable}>edit</EditButton>
-              </React.Fragment>
-            )}
-          </Content>
-          <Footer>
-            {/* <DueTime overdue>
+      <Mask onClick={onClose} ref={wrapper} />
+      <Container editable={editable}>
+        <Header>
+          <Title>
+            <Checkbox checked={task.finished} onChange={onCheckboxChange} />
+            <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
+          </Title>
+        </Header>
+        <Content>
+          {editable ? (
+            <React.Fragment>
+              <EditArea onChange={onContentChange} value={content} />
+              <SaveButton onClick={onTaskSave}>save</SaveButton>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <Markdown
+                source={task.content}
+                className='markdown-body'
+                allowNode={() => true}
+                escapeHtml={false}
+                skipHtml={false}
+                renderers={{ code: CodeBlock }}
+              />
+              <EditButton onClick={onEditable}>edit</EditButton>
+            </React.Fragment>
+          )}
+        </Content>
+        <Footer>
+          {/* <DueTime overdue>
             <DueTimeIcon size='small' name='Clock' />
             <DueTimeDetail>
               {timeAgo.format(task.DueAt)}
             </DueTimeDetail>
           </DueTime> */}
-          </Footer>
-        </Container>
-      </ScrollArea>
+        </Footer>
+      </Container>
     </Wrapper>
   )
 })
