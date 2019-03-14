@@ -1,11 +1,16 @@
 import * as React from 'react'
 import { Route, RouteComponentProps } from 'react-router'
-import { DragDropContext, DraggableLocation, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd'
+import {
+  DragDropContext,
+  DraggableLocation,
+  Droppable,
+  DroppableProvided,
+  DropResult
+} from 'react-beautiful-dnd'
 import { observer } from 'mobx-react-lite'
 import { Switch } from 'react-router-dom'
 
 import GroupAddition from '../components/GroupAddition'
-import ScrollArea from '../components/ScrollArea'
 import TagContext from '../components/TagContext'
 import TaskGroup from '../components/TaskGroup'
 import styled from '../styles/styled-components'
@@ -74,29 +79,27 @@ export default observer(function BoardView (props: Props) {
 
   return (
     <TagContext.Provider value={{ tags: [] }}>
-      {/* <ScrollArea direction='horizontal'> */}
-        <Container>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId='board' type='GROUP' direction='horizontal'>
-              {(provided: DroppableProvided) => (
-                <Container ref={provided.innerRef} {...provided.droppableProps}>
-                  {groups.map((group: IGroup, index: number) => {
-                    return (
-                      <TaskGroup
-                        key={group.id}
-                        index={index}
-                        group={group}
-                        onClickTask={onClickTask}
-                      />
-                    )
-                  })}
-                  <GroupAddition onConfirm={onAddGroup} />
-                </Container>
-              )}
-            </Droppable>
-          </DragDropContext>
-        </Container>
-      {/* </ScrollArea> */}
+      <Container>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId='board' type='GROUP' direction='horizontal'>
+            {(provided: DroppableProvided) => (
+              <Container ref={provided.innerRef} {...provided.droppableProps}>
+                {groups.map((group: IGroup, index: number) => {
+                  return (
+                    <TaskGroup
+                      key={group.id}
+                      index={index}
+                      group={group}
+                      onClickTask={onClickTask}
+                    />
+                  )
+                })}
+                <GroupAddition onConfirm={onAddGroup} />
+              </Container>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </Container>
       <Switch>
         <Route
           path='/boards/:boardId/task/:taskId'

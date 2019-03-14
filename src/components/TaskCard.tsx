@@ -7,7 +7,6 @@ import styled from '../styles/styled-components'
 import Card from './Card'
 import Checkbox from './Checkbox'
 import CodeBlock from './CodeBlock'
-import Icon from './Icon'
 import Tag from './Tag'
 import TagContext from './TagContext'
 import { ITag, ITask } from '../models'
@@ -26,25 +25,25 @@ export interface Props {
 }
 
 function OriginalTaskCard (props: Props & ContextProps) {
-  const { tags, task, onClick = noop, onFinishedChange = noop, ...rest } = props
+  const { tags, task, onClick = noop, onFinishedChange = noop } = props
 
   const newTags = tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
 
   const taskId = 'task' + task.id
 
-  const onCheckboxChange = () => {
+  const onCheckboxChange = React.useCallback(() => {
     onFinishedChange(task)
-  }
+  }, [task])
 
-  const onCardClick = () => {
+  const onCardClick = React.useCallback(() => {
     onClick(task)
-  }
+  }, [task])
 
   return (
     <Wrapper key={taskId}>
-      <Card data-id={task.id}>
+      <Card>
         <Header>
-          <Title {...rest}>
+          <Title>
             <Checkbox
               checked={task.finished}
               onChange={onCheckboxChange}
@@ -101,8 +100,7 @@ const Header = styled.div(() => ({
 const Container = styled.div(() => ({
   fontSize: '13px',
   overflow: 'hidden',
-  maxHeight: '200px',
-  cursor: 'default'
+  maxHeight: '200px'
 }))
 
 const Footer = styled.div(() => ({

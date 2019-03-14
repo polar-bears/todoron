@@ -37,6 +37,7 @@ export default observer(function TaskView (props: Props) {
   const onClose = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.currentTarget !== wrapper.current) return
 
+    taskStore.selectTask(null)
     props.history.push(`/boards/${props.match.params.boardId}`)
   }, [])
 
@@ -79,25 +80,22 @@ export default observer(function TaskView (props: Props) {
             <Checkbox checked={task.finished} onChange={onCheckboxChange} />
             <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
           </Title>
+          {editable && <Button size='small' icon='Save' onClick={onTaskSave} />}
+          {!editable && (
+            <Button size='small' icon='Edit' onClick={onEditable} />
+          )}
         </Header>
         <Content>
-          {editable ? (
-            <React.Fragment>
-              <EditArea onChange={onContentChange} value={content} />
-              <SaveButton onClick={onTaskSave}>save</SaveButton>
-            </React.Fragment>
-          ) : (
-            <React.Fragment>
-              <Markdown
-                source={task.content}
-                className='markdown-body'
-                allowNode={() => true}
-                escapeHtml={false}
-                skipHtml={false}
-                renderers={{ code: CodeBlock }}
-              />
-              <EditButton onClick={onEditable}>edit</EditButton>
-            </React.Fragment>
+          {editable && <EditArea onChange={onContentChange} value={content} />}
+          {!editable && (
+            <Markdown
+              source={task.content}
+              className='markdown-body'
+              allowNode={() => true}
+              escapeHtml={false}
+              skipHtml={false}
+              renderers={{ code: CodeBlock }}
+            />
           )}
         </Content>
         <Footer>
@@ -133,20 +131,6 @@ const Mask = styled.div(() => ({
   left: 0,
   right: 0,
   transition: 'all .3s'
-}))
-
-const SaveButton = styled(Button)(() => ({
-  position: 'absolute',
-  bottom: '50px',
-  right: '20px',
-  zIndex: 20
-}))
-
-const EditButton = styled(Button)(() => ({
-  position: 'absolute',
-  bottom: '20px',
-  right: '10px',
-  zIndex: 20
 }))
 
 const Container = styled.div<{ editable: boolean }>(({ editable }) => ({

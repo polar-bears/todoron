@@ -44,8 +44,8 @@ export default function GroupAddition (props: Props) {
             onEnter={confirm}
             onChange={onInputValue}
           />
-          <Button icon='Check' onClick={confirm} />
-          <Button icon='X' onClick={onToggle} />
+          <Button size='small' icon='Check' onClick={confirm} />
+          <Button size='small' icon='X' onClick={onToggle} />
         </Container>
       ) : (
         <AddButton full size='large' onClick={onToggle}>
@@ -63,8 +63,10 @@ const Wrapper = styled.div(() => ({
 const Container = styled.div(({ theme }) => ({
   background: theme.bg,
   marginRight: '10px',
+  padding: '0 10px',
   verticalAlign: 'top',
   display: 'flex',
+  alignItems: 'center',
   input: {
     flex: 1
   }

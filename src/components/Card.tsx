@@ -14,11 +14,11 @@ export interface Props {
 export default function Card (props: Props) {
   const { className, children, stacked = false, onClick = noop } = props
 
-  const onCardClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const onCardClick = React.useCallback((e: React.MouseEvent) => {
+    if (e.defaultPrevented) return
 
-    onClick()
-  }
+    onClick(e)
+  }, [stacked])
 
   return (
     <Wrapper className={className} stacked={stacked} onClick={onCardClick}>

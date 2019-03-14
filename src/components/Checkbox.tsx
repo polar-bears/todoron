@@ -7,13 +7,18 @@ export interface Props {
   className?: string
   checked?: boolean
   children?: React.ReactNode
-  onChange?: (checked: boolean) => void
+  onChange?: (checked: boolean, e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 export default function Checkbox (props: Props) {
   const { className, children, checked = false, onChange = noop } = props
 
-  const onCheckbox = () => onChange(!checked)
+  const onCheckbox = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
+    if (e.defaultPrevented) return
+
+    onChange(!checked, e)
+  }, [checked])
 
   return (
     <Wrapper className={className}>

@@ -7,8 +7,8 @@ import MainView from './views/MainView'
 import { GlobalStyles } from './styles/reset'
 import { lightTheme } from './styles/theme'
 
-// import 'github-markdown-css'
-// import 'highlight.js/styles/solarized-light.css'
+import 'github-markdown-css'
+import 'highlight.js/styles/solarized-light.css'
 
 const history = createBrowserHistory()
 

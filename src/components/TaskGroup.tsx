@@ -9,6 +9,7 @@ import TaskCard from './TaskCard'
 import TaskAddition, { ConfirmData } from '../components/TaskAddition'
 import { IGroup, ITask } from '../models'
 import { default as TaskStore } from '../stores/TaskStore'
+import Button from './Button';
 
 export interface Props {
   group: IGroup
@@ -89,16 +90,16 @@ export default function TaskGroup (props: Props) {
                   <Label>
                     {group.title}&nbsp;({tasks.length})
                   </Label>
-                  <IconWrapper>
-                    <EditIcon size='small' name='Edit' onClick={onToggleEdit} />
-                  </IconWrapper>
-                  <IconWrapper>
-                    <DelIcon
-                      size='small'
-                      name='Trash2'
-                      onClick={onRemoveGroup}
+                  <Button
+                    size='small'
+                    icon='Edit'
+                    onClick={onToggleEdit}
                     />
-                  </IconWrapper>
+                  <Button
+                    size='small'
+                    icon='Trash2'
+                    onClick={onRemoveGroup}
+                  />
                 </Title>
               )}
             </Header>
@@ -116,6 +117,7 @@ export default function TaskGroup (props: Props) {
                           <TaskWrapper
                             ref={dragProvided.innerRef}
                             {...dragProvided.draggableProps}
+                            {...dragProvided.dragHandleProps}
                           >
                             <TaskCard
                               key={task.id}
@@ -123,7 +125,6 @@ export default function TaskGroup (props: Props) {
                               index={index}
                               onClick={onClick}
                               onFinishedChange={onFinishedChange}
-                              {...dragProvided.dragHandleProps}
                             />
                           </TaskWrapper>
                         )}
@@ -164,7 +165,7 @@ const Container = styled.div(({ theme }) => ({
   boxShadow: theme.boxShadow
 }))
 
-const Header = styled.div<{ isDragging: boolean }>(({ isDragging }) => ({
+const Header = styled.div<{ isDragging: boolean }>(() => ({
   display: 'flex',
   alignItems: 'center',
   minHeight: '40px'
@@ -172,24 +173,6 @@ const Header = styled.div<{ isDragging: boolean }>(({ isDragging }) => ({
 
 const StyledInput = styled(Input)(() => ({
   flex: 1
-}))
-
-const IconWrapper = styled.div(() => ({}))
-
-const EditIcon = styled(Icon)(({ theme }) => ({
-  cursor: 'default',
-  color: theme.fgLight,
-  '&:hover': {
-    color: theme.colors.green
-  }
-}))
-
-const DelIcon = styled(Icon)(({ theme }) => ({
-  cursor: 'default',
-  color: theme.fgLight,
-  '&:hover': {
-    color: theme.colors.red
-  }
 }))
 
 const Title = styled.div(({ theme }) => ({

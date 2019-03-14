@@ -67,7 +67,7 @@ export default function BoardItem (props: Props) {
       ) : (
         <React.Fragment>
           <Content>{board.title}</Content>
-          <EditIcon name='Edit2' onClick={onToggleEditBoard} />
+          <EditIcon name='Edit' onClick={onToggleEditBoard} />
           <DelIcon name='Trash2' onClick={onBoardDelete} />
         </React.Fragment>
       )}

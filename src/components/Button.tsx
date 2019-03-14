@@ -85,6 +85,7 @@ const Wrapper = styled.button<{
   borderRadius: theme.borderRadius,
   textAlign: 'center',
   transition: 'background 0.3s, color 0.3s',
+  cursor: !disabled ? 'initial' : 'not-allowed',
   '&:hover': !disabled
     ? {
       color: theme.fg,

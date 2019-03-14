@@ -38,11 +38,6 @@ $ npm install && npm start
 * [react-feather](https://github.com/feathericons/react-feather) - The collection of simply beautiful open source icons for React.js
 * ...
 
-## Authors
-
-* **varHarrie** - *Initial work* - [varHarrie](https://github.com/varHarrie)
-* **Duobe** - *Carry out the work* - [Duobe](https://github.com/duobe)
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
