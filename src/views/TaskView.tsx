@@ -35,8 +35,6 @@ export default observer(function TaskView (props: Props) {
   }, [taskId])
 
   const onClose = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.currentTarget !== wrapper.current) return
-
     taskStore.selectTask(null)
     props.history.push(`/boards/${props.match.params.boardId}`)
   }, [])
@@ -73,7 +71,6 @@ export default observer(function TaskView (props: Props) {
 
   return (
     <Wrapper>
-      <Mask onClick={onClose} ref={wrapper} />
       <Container editable={editable}>
         <Header>
           <Title>
@@ -84,6 +81,7 @@ export default observer(function TaskView (props: Props) {
           {!editable && (
             <Button size='small' icon='Edit' onClick={onEditable} />
           )}
+          <Button size='small' icon='X' onClick={onClose} />
         </Header>
         <Content>
           {editable && <EditArea onChange={onContentChange} value={content} />}
@@ -121,27 +119,22 @@ const Wrapper = styled.div(() => ({
   width: '100%',
   height: '100%',
   background: 'rgba(238, 236, 232, .8)',
-  overflowY: 'auto'
-}))
-
-const Mask = styled.div(() => ({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  transition: 'all .3s'
-}))
-
-const Container = styled.div<{ editable: boolean }>(({ editable }) => ({
-  margin: '40px 100px',
-  padding: '10px',
-  background: '#fff',
-  minHeight: '520px',
-  position: 'relative',
+  overflowY: 'auto',
   display: 'flex',
+  justifyContent: 'center'
+}))
+
+const Container = styled.div<{ editable: boolean }>(({ theme }) => ({
+  background: theme.colors.white,
+  width: '800px',
+  padding: '10px',
+  margin: '40px 20px',
   flexDirection: 'column',
-  height: !editable ? 'auto' : 'calc(100% - 80px)'
+  display: 'flex',
+  '@media (max-width: 600px)': {
+    width: '100%',
+    margin: '40px 0'
+  }
 }))
 
 const Content = styled.div(() => ({
@@ -154,11 +147,9 @@ const Content = styled.div(() => ({
 }))
 
 const EditArea = styled(Textarea)(({ theme }) => ({
-  width: '100%',
+  border: `${theme.border}`,
   height: '100%',
   lineHeight: '1.5em',
-  minHeight: '440px',
-  border: `${theme.border}`,
   resize: 'none'
 }))
 

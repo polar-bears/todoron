@@ -36,17 +36,17 @@ export default function TextArea (props: Props) {
     }
   }, [autoFocus])
 
-  const onValueChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onValueChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     let newVal = e.target.value
 
     if (limit && !isNaN(limit)) newVal = newVal.substring(0, limit)
 
     onChange(newVal, e)
-  }
+  }, [])
 
-  const onTextareaKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onTextareaKeyUp = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     onKeyUp(e.currentTarget.value, e)
-  }
+  }, [])
 
   return (
     <Wrapper>
@@ -70,7 +70,8 @@ export default function TextArea (props: Props) {
 }
 
 const Wrapper = styled.div(() => ({
-  position: 'relative'
+  position: 'relative',
+  height: '100%'
 }))
 
 const OriginalTextArea = styled.textarea<{

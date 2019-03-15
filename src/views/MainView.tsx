@@ -196,16 +196,16 @@ const SidePanelTitle = styled.div(() => ({
 }))
 
 const Addition = styled.div<{ visible: boolean }>(({ theme, visible }) => ({
-  padding: '0 15px',
-  alignItems: 'center',
   marginTop: visible ? 0 : '-1px',
-  display: visible ? 'flex' : 'none',
+  padding: '0 15px',
+  display: 'flex',
+  alignItems: 'center',
   height: visible ? '36px' : 0,
   borderBottom: theme.border,
   overflow: visible ? 'visible' : 'hidden',
   opacity: visible ? 1 : 0,
-  transition: 'opacity 0.3s ease, height 0.3s ease',
-  input: {
+  transition: 'opacity 0.3s ease-out, height 0.3s ease-out',
+  'input': {
     margin: '0 10px',
     flex: 1
   }
