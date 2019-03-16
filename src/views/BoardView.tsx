@@ -1,12 +1,6 @@
 import * as React from 'react'
 import { Route, RouteComponentProps } from 'react-router'
-import {
-  DragDropContext,
-  DraggableLocation,
-  Droppable,
-  DroppableProvided,
-  DropResult
-} from 'react-beautiful-dnd'
+import { DragDropContext, DraggableLocation, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd'
 import { observer } from 'mobx-react-lite'
 import { Switch } from 'react-router-dom'
 
@@ -18,6 +12,8 @@ import TaskView from './TaskView'
 import { default as BoardStore } from '../stores/BoardStore'
 import { default as TaskStore } from '../stores/TaskStore'
 import { IGroup, ITask } from '../models'
+
+const renderTaskView = (routeProps: any) => <TaskView {...routeProps} />
 
 export interface Props extends RouteComponentProps<{ boardId: string }> {}
 
@@ -103,7 +99,7 @@ export default observer(function BoardView (props: Props) {
       <Switch>
         <Route
           path='/boards/:boardId/task/:taskId'
-          component={(routeProps: any) => <TaskView {...routeProps} />}
+          component={renderTaskView}
         />
       </Switch>
     </TagContext.Provider>

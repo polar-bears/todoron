@@ -14,6 +14,8 @@ import BoardView from './BoardView'
 import { default as BoardStore } from '../stores/BoardStore'
 import { IBoard } from '../models'
 
+const renderBoardView = (routeProps: any) => <BoardView {...routeProps} />
+
 export interface Props extends RouteComponentProps<{}> {}
 
 export default observer(function MainView (props: Props) {
@@ -44,12 +46,9 @@ export default observer(function MainView (props: Props) {
     setAddingTitle('')
   }, [editing, focused])
 
-  const onAddingTitleChange = React.useCallback(
-    (value: string) => {
-      setAddingTitle(value)
-    },
-    []
-  )
+  const onAddingTitleChange = React.useCallback((value: string) => {
+    setAddingTitle(value)
+  }, [])
 
   const onAddingConfirm = React.useCallback(async () => {
     if (addingTitle.trim() === '') return
@@ -87,7 +86,7 @@ export default observer(function MainView (props: Props) {
     if (index === 0) {
       id = store.boards[index + 1].id
       store.selectBoard(id)
-    } else if (index === (store.boards.length - 1)) {
+    } else if (index === store.boards.length - 1) {
       id = store.boards[index - 1].id
       store.selectBoard(id)
     } else {
@@ -165,10 +164,7 @@ export default observer(function MainView (props: Props) {
           ))}
         </SidePanel>
         <Switch>
-          <Route
-            path='/boards/:boardId'
-            component={(routeProps: any) => <BoardView {...routeProps} />}
-          />
+          <Route path='/boards/:boardId' component={renderBoardView} />
           <Redirect to={`/boards/${board!.id}`} />
         </Switch>
       </Container>
@@ -205,7 +201,7 @@ const Addition = styled.div<{ visible: boolean }>(({ theme, visible }) => ({
   overflow: visible ? 'visible' : 'hidden',
   opacity: visible ? 1 : 0,
   transition: 'opacity 0.3s ease-out, height 0.3s ease-out',
-  'input': {
+  input: {
     margin: '0 10px',
     flex: 1
   }

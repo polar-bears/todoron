@@ -11,6 +11,7 @@ import 'github-markdown-css'
 import 'highlight.js/styles/solarized-light.css'
 
 const history = createBrowserHistory()
+const renderApp = (routeProps: any) => <MainView {...routeProps}/>
 
 export interface Props {}
 
@@ -21,7 +22,7 @@ export default function App (props: Props) {
     <ThemeProvider theme={theme}>
       <Router history={history}>
         <React.Fragment>
-          <Route component={(routeProps: any) => <MainView {...routeProps}/>} />
+          <Route component={renderApp} />
           <GlobalStyles />
         </React.Fragment>
       </Router>

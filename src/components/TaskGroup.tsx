@@ -3,13 +3,12 @@ import { Draggable, DraggableProvided, DraggableStateSnapshot, Droppable, Droppa
 
 import noop from '../libs/noop'
 import styled from '../styles/styled-components'
-import Icon from './Icon'
+import Button from './Button'
 import Input from './Input'
 import TaskCard from './TaskCard'
 import TaskAddition, { ConfirmData } from '../components/TaskAddition'
 import { IGroup, ITask } from '../models'
 import { default as TaskStore } from '../stores/TaskStore'
-import Button from './Button';
 
 export interface Props {
   group: IGroup
@@ -32,6 +31,17 @@ export default function TaskGroup (props: Props) {
 
   const [title, setTitle] = React.useState(group.title)
   const [editable, setEditable] = React.useState(false)
+  const [doRemove, setDoRemove] = React.useState(false)
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDoRemove(false)
+    }, 2000)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [doRemove])
 
   const onAddTask = React.useCallback(
     async ({ groupId, content }: ConfirmData) => {
@@ -47,6 +57,10 @@ export default function TaskGroup (props: Props) {
   const onFinishedChange = React.useCallback(async (task: ITask) => {
     await taskStore.updateTask(task.id, { finished: !task.finished })
   }, [])
+
+  const canRemove = React.useCallback(() => {
+    setDoRemove(true)
+  }, [doRemove])
 
   const onRemoveGroup = React.useCallback(async () => {
     await taskStore.removeGroup(id)
@@ -90,16 +104,15 @@ export default function TaskGroup (props: Props) {
                   <Label>
                     {group.title}&nbsp;({tasks.length})
                   </Label>
-                  <Button
-                    size='small'
-                    icon='Edit'
-                    onClick={onToggleEdit}
-                    />
-                  <Button
-                    size='small'
-                    icon='Trash2'
+                  <Button size='small' icon='Edit' onClick={onToggleEdit} />
+                  <Button size='small' icon='Trash2' onClick={canRemove} />
+                  <RemoveButton
+                    as={Button}
+                    doRemove={doRemove}
                     onClick={onRemoveGroup}
-                  />
+                  >
+                    确定
+                  </RemoveButton>
                 </Title>
               )}
             </Header>
@@ -184,7 +197,8 @@ const Title = styled.div(({ theme }) => ({
   textIndent: '10px',
   display: 'flex',
   alignItems: 'center',
-  width: '100%'
+  width: '100%',
+  position: 'relative'
 }))
 
 const Label = styled.label(() => ({
@@ -197,3 +211,22 @@ const Label = styled.label(() => ({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap'
 }))
+
+const RemoveButton = styled.div<{ doRemove: boolean }>(
+  ({ theme, doRemove }) => ({
+    opacity: doRemove ? 1 : 0,
+    width: '48px',
+    height: doRemove ? '26px' : '0px',
+    fontSize: '12px',
+    position: 'absolute',
+    zIndex: doRemove ? 99 : -1,
+    top: '6px',
+    right: '-8px',
+    cursor: 'pointer',
+    backgroundColor: theme.bgDark,
+    border: theme.border,
+    borderRadius: theme.borderRadius,
+
+    transition: 'opacity 0.3s ease-out, height 0.3s ease-out'
+  })
+)
