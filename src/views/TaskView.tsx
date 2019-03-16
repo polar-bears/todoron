@@ -13,8 +13,7 @@ import { default as TaskStore } from '../stores/TaskStore'
 
 const timeAgo = createTimeAgo()
 
-export interface Props
-  extends RouteComponentProps<{ boardId: string; taskId: string }> {}
+export interface Props extends RouteComponentProps<{ boardId: string; taskId: string }> {}
 
 export default observer(function TaskView (props: Props) {
   const taskStore = React.useContext(TaskStore)
@@ -22,8 +21,6 @@ export default observer(function TaskView (props: Props) {
 
   const [editable, setEditable] = React.useState(false)
   const [content, setContent] = React.useState('')
-
-  const wrapper: React.RefObject<HTMLDivElement> = React.useRef(null)
 
   const taskId = Number(props.match.params.taskId)
 
