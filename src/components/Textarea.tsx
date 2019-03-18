@@ -95,7 +95,7 @@ const OriginalTextArea = styled.textarea<{
 const Count = styled.div(({ theme }) => ({
   position: 'absolute',
   bottom: '5px',
-  right: '5px',
+  right: '8px',
   fontSize: '12px',
   color: theme.fgLight
 }))

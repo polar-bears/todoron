@@ -48,7 +48,6 @@ const Wrapper = styled.div<{ stacked: boolean }>(({ theme, stacked }) => ({
 
 const Inner = styled.div(({ theme }) => ({
   position: 'relative',
-  padding: '8px',
   fontSize: '14px',
   color: theme.fgDark,
   background: theme.bgLighter,

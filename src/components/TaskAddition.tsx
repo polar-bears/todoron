@@ -73,7 +73,7 @@ function OriginalTaskAddition (props: Props & ContextProps) {
 
   return (
     <StyledCard as={Card}>
-      <Textarea
+      <TextArea
         autoFocus
         rows={3}
         limit={1000}
@@ -114,15 +114,30 @@ export default function TaskAddition (props: Props) {
   )
 }
 
-const StyledCard = styled.div(() => ({
-  margin: '10px 10px 0 10px',
-  paddingBottom: '10px'
+const StyledCard = styled.div(({ theme }) => ({
+  margin: '0px 10px',
+  paddingBottom: '10px',
+  '& > div': {
+    boxShadow: `0px 0px 5px rgba(0,0,0,0.08)`,
+    '& > div:first-child': {
+      margin: '5px 5px 0',
+      paddingTop: '5px'
+    }
+  }
+}))
+
+const TextArea = styled(Textarea)(({ theme }) => ({
+  border: `1px solid ${theme.colors.gray2}`,
+  '&:focus': {
+    border: theme.border
+  }
 }))
 
 const Actions = styled.div(() => ({
-  marginTop: '5px',
+  padding: '5px',
   display: 'flex',
-  alignItems: 'center'
+  alignItems: 'center',
+  background: 'transparent'
 }))
 
 // const Header = styled.div(() => ({

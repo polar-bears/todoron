@@ -40,7 +40,7 @@ function OriginalTaskCard (props: Props & ContextProps) {
   }, [task])
 
   return (
-    <Wrapper key={taskId}>
+    <Wrapper key={taskId} finished={task.finished}>
       <Card>
         <Header>
           <Title>
@@ -87,17 +87,20 @@ export default function TaskCard (props: Props) {
   )
 }
 
-const Wrapper = styled.div(() => ({
+const Wrapper = styled.div<{ finished: boolean }>(({ finished }) => ({
   margin: '0 10px 0 10px',
-  paddingBottom: '10px'
+  paddingBottom: '10px',
+  opacity: finished ? 0.5 : 1,
+  transition: 'opacity .3s'
 }))
 
 const Header = styled.div(() => ({
-  marginBottom: '8px',
+  padding: '8px',
   display: 'flex'
 }))
 
 const Container = styled.div(() => ({
+  padding: '0 8px 8px 8px',
   fontSize: '13px',
   overflow: 'hidden',
   maxHeight: '200px'

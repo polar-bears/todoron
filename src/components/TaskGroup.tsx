@@ -28,6 +28,7 @@ export default function TaskGroup (props: Props) {
   const taskStore = React.useContext(TaskStore)
 
   const { id, tasks } = group
+  const { selectedTask } = taskStore
 
   const [title, setTitle] = React.useState(group.title)
   const [editable, setEditable] = React.useState(false)
@@ -52,11 +53,11 @@ export default function TaskGroup (props: Props) {
 
   const onClick = React.useCallback((task: ITask) => {
     onClickTask(task)
-  }, [])
+  }, [selectedTask])
 
   const onFinishedChange = React.useCallback(async (task: ITask) => {
     await taskStore.updateTask(task.id, { finished: !task.finished })
-  }, [])
+  }, [selectedTask])
 
   const canRemove = React.useCallback(() => {
     setDoRemove(true)

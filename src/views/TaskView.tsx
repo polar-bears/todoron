@@ -31,7 +31,7 @@ export default observer(function TaskView (props: Props) {
     }
   }, [taskId])
 
-  const onClose = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const onClose = React.useCallback(() => {
     taskStore.selectTask(null)
     props.history.push(`/boards/${props.match.params.boardId}`)
   }, [])
@@ -64,6 +64,12 @@ export default observer(function TaskView (props: Props) {
     setEditable(false)
   }, [editable, content])
 
+  const onRemoveTask = React.useCallback(async () => {
+    await taskStore.removeTask(taskId)
+    taskStore.selectedId = null
+    props.history.push(`/boards/${props.match.params.boardId}`)
+  }, [])
+
   if (!task) return null
 
   return (
@@ -94,6 +100,7 @@ export default observer(function TaskView (props: Props) {
           )}
         </Content>
         <Footer>
+          <Button size='small' icon='Trash2' onClick={onRemoveTask} />
           {/* <DueTime overdue>
             <DueTimeIcon size='small' name='Clock' />
             <DueTimeDetail>
