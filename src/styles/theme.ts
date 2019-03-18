@@ -1,7 +1,7 @@
 const colors = {
   gray1: '#FAFCFF',
   gray2: '#F2F6F8',
-  gray3: '#E6E8Ea',
+  gray3: '#E6E8EA',
   gray4: '#C2C6C8',
   gray5: '#929698',
   gray6: '#626668',
@@ -10,7 +10,7 @@ const colors = {
   blue: '#2189F1',
   red: '#FF5050',
   green: '#82C788',
-  yellow: '#F29B25',
+  yellow: '#F29B25'
 }
 
 export const lightTheme = {
@@ -28,5 +28,5 @@ export const lightTheme = {
   borderRadius: '2px',
   border: `1px solid ${colors.gray3}`,
   borderDark: `1.5px solid ${colors.gray5}`,
-  borderDarker: `1.5px solid ${colors.gray6}`,
+  borderDarker: `1.5px solid ${colors.gray6}`
 }

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useState } from 'react'
 
 import styled from '../styles/styled-components'
 import Button from './Button'
@@ -8,97 +9,84 @@ import Textarea from './Textarea'
 import { ITag } from '../models'
 
 export type ConfirmData = {
-  groupId: number,
-  content: string,
-}
-
-export interface ITaskAdditionContext {
-  tags: ITag[]
-}
-
-export interface ITaskAdditionProps {
   groupId: number
-  onConfirm?: (data: ConfirmData, reset: (reopen?: boolean) => void, fromShortcut: boolean) => void
-}
-
-export interface ITaskAdditionState {
-  editing: boolean
   content: string
 }
 
-const defaultState: ITaskAdditionState = {
-  editing: false,
-  content: '',
+export interface ContextProps {
+  tags: ITag[]
 }
 
-class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdditionContext, ITaskAdditionState> {
+export interface Props {
+  groupId: number
+  onConfirm?: (
+    data: ConfirmData,
+    reset: (reopen?: boolean) => void,
+    fromShortcut: boolean
+  ) => void
+}
 
-  public state: ITaskAdditionState = {
-    editing: false,
-    content: '',
+function OriginalTaskAddition (props: Props & ContextProps) {
+  const { groupId, onConfirm } = props
+
+  const [editing, setEditing] = useState(false)
+  const [content, setContent] = useState('')
+
+  const reset = (newEditing: boolean = false) => {
+    setContent('')
+    setEditing(newEditing)
   }
 
-  public open = () => {
-    this.setState({ editing: true })
+  const onContentChange = (newContent: string) => {
+    setContent(newContent)
   }
 
-  public reset = (editing: boolean = false) => {
-    this.setState({ ...defaultState, editing })
+  const onToggle = () => {
+    setContent('')
+    setEditing(!editing)
   }
 
-  private onContentChange = (content: string) => {
-    this.setState({ content })
+  const confirm = () => {
+    if (content.trim() && onConfirm) {
+      onConfirm({ groupId, content }, reset, false)
+    }
+    setContent('')
+    setEditing(!editing)
   }
 
-  private onToggle = () => {
-    this.setState({ ...defaultState, editing: !this.state.editing })
-  }
-
-  private onConfirm = () => {
-    const { groupId, onConfirm } = this.props
-    let content = this.state.content.trim()
-
-    if (content && onConfirm) {
-      onConfirm({ groupId, content }, this.reset, false)
+  const onTextareaKeyUp = (
+    value: string,
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.keyCode === 13 && e.ctrlKey && content.trim() && onConfirm) {
+      onConfirm({ groupId, content: value.trim() }, reset, true)
     }
   }
 
-  private onKeyUp = (e: React.KeyboardEvent<any>) => {
-    if (e.keyCode === 13 && e.ctrlKey) {
-      const { groupId, onConfirm } = this.props
-      let content = this.state.content.trim()
-
-      if (content && onConfirm) {
-        onConfirm({ groupId, content }, this.reset, true)
-      }
-    }
-  }
-
-  public render () {
-    const { editing, content } = this.state
-
-    if (!editing) {
-      return (
-        <Button full onClick={this.onToggle}>Add Task</Button>
-      )
-    }
-
+  if (!editing) {
     return (
-      <StyledCard as={Card}>
-        <Textarea
-          autoFocus
-          rows={3}
-          limit={1000}
-          value={content}
-          placeholder='Task Content'
-          onChange={this.onContentChange}
-          onKeyUp={this.onKeyUp}
-        />
-        <Actions>
-          <Button size='small' icon='Check' onClick={this.onConfirm}/>
-          <Button size='small' icon='X' onClick={this.onToggle}/>
-        </Actions>
-        {/* <Header>
+      <Button full onClick={onToggle}>
+        Add Task
+      </Button>
+    )
+  }
+
+  return (
+    <StyledCard as={Card}>
+      <TextArea
+        autoFocus
+        rows={3}
+        limit={1000}
+        value={content}
+        placeholder='Task Content'
+        onChange={onContentChange}
+        onKeyUp={onTextareaKeyUp}
+      />
+      <Actions>
+        <Button size='small' icon='Check' onClick={confirm} />
+        <Button size='small' icon='X' onClick={onToggle} />
+      </Actions>
+      {/* <Header>
           <Title>
             <Checkbox/>
             <DateInfo>Created at 5 minutes ago</DateInfo>
@@ -114,30 +102,42 @@ class OriginalTaskAddition extends React.Component<ITaskAdditionProps & ITaskAdd
             </DueTimeDetail>
           </DueTime>
         </Footer> */}
-      </StyledCard>
-    )
-  }
-
+    </StyledCard>
+  )
 }
 
-export default function TaskAddition (props: ITaskAdditionProps) {
+export default function TaskAddition (props: Props) {
   return (
     <TagContext.Consumer>
-      {(context) => (
-        <OriginalTaskAddition {...context} {...props}/>
-      )}
+      {(context) => <OriginalTaskAddition {...context} {...props} />}
     </TagContext.Consumer>
   )
 }
 
-const StyledCard = styled.div(() => ({
-  margin: '10px',
+const StyledCard = styled.div(({ theme }) => ({
+  margin: '0px 10px',
+  paddingBottom: '10px',
+  '& > div': {
+    boxShadow: `0px 0px 5px rgba(0,0,0,0.08)`,
+    '& > div:first-child': {
+      margin: '5px 5px 0',
+      paddingTop: '5px'
+    }
+  }
+}))
+
+const TextArea = styled(Textarea)(({ theme }) => ({
+  border: `1px solid ${theme.colors.gray2}`,
+  '&:focus': {
+    border: theme.border
+  }
 }))
 
 const Actions = styled.div(() => ({
-  marginTop: '5px',
+  padding: '5px',
   display: 'flex',
   alignItems: 'center',
+  background: 'transparent'
 }))
 
 // const Header = styled.div(() => ({

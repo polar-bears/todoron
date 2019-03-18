@@ -17,3 +17,27 @@
     <img src="https://img.shields.io/github/languages/top/polar-bears/todoron.svg?style=flat-square" alt="Typescript">
   </a>
 </p>
+
+# Todoron
+
+💡 An efficient and lightweight to-do app.  https://polar-bears.github.io/todoron/
+
+## Getting Started
+
+```bash
+$ npm install && npm start
+```
+
+## Built With
+
+* [parcel](https://parceljs.org/) - The web application bundler
+* [Dexie](https://github.com/dfahlander/Dexie.js) - The wrapper library for indexedDB
+* [React](https://reactjs.org/) - The web framework used
+* [React-router](https://reacttraining.com/react-router) - Routing management
+* [styled-components](https://www.styled-components.com/) - Visual primitives for the component age
+* [react-feather](https://github.com/feathericons/react-feather) - The collection of simply beautiful open source icons for React.js
+* ...
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

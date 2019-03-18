@@ -1,83 +1,78 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 import Button from './Button'
 import Input from './Input'
 
-export interface IGroupAdditionProps {
+export interface Props {
   onConfirm?: (value: string, reset: () => void) => void
 }
 
-export interface IGroupAdditionState {
-  editing: boolean
-  value: string
-}
+export default function GroupAddition (props: Props) {
+  const { onConfirm = noop } = props
 
-export default class GroupAddition extends React.Component<IGroupAdditionProps, IGroupAdditionState> {
+  const [editing, setEditing] = React.useState(false)
+  const [value, setValue] = React.useState('')
 
-  public state: IGroupAdditionState = {
-    editing: false,
-    value: '',
+  const onInputValue = (newVal: string) => {
+    setValue(newVal)
   }
 
-  public open = () => {
-    this.setState({ editing: true })
-  }
-
-  public reset = () => {
-    this.setState({ editing: false, value: '' })
-  }
-
-  private onValueChange = (value: string) => {
-    this.setState({ value })
-  }
-
-  private onToggle = () => {
-    this.setState({ editing: !this.state.editing, value: '' })
-  }
-
-  private onConfirm = () => {
-    const { onConfirm } = this.props
-    let value = this.state.value.trim()
-
-    if (value && onConfirm) {
-      onConfirm(value, this.reset)
+  const confirm = () => {
+    if (value.trim() && onConfirm) {
+      onConfirm(value, () => {
+        setEditing(false)
+        setValue('')
+      })
     }
   }
 
-  public render () {
-    const { value, editing } = this.state
-
-    return (
-      <Wrapper>
-        {editing ? (
-          <Container>
-            <Input
-              autoFocus
-              value={value}
-              placeholder='Group Name'
-              onChange={this.onValueChange}
-              onEnter={this.onConfirm}
-            />
-            <Button icon='Check' onClick={this.onConfirm}/>
-            <Button icon='X' onClick={this.onToggle}/>
-          </Container>
-        ) : (
-          <Button full size='large' onClick={this.onToggle}>Add Group</Button>
-        )}
-      </Wrapper>
-    )
+  const onToggle = () => {
+    setEditing(!editing)
+    setValue('')
   }
 
+  return (
+    <Wrapper>
+      {editing ? (
+        <Container>
+          <Input
+            autoFocus
+            value={value}
+            placeholder='Group Name'
+            onEnter={confirm}
+            onChange={onInputValue}
+          />
+          <Button size='small' icon='Check' onClick={confirm} />
+          <Button size='small' icon='X' onClick={onToggle} />
+        </Container>
+      ) : (
+        <AddButton full size='large' onClick={onToggle}>
+          Add Group
+        </AddButton>
+      )}
+    </Wrapper>
+  )
 }
 
 const Wrapper = styled.div(() => ({
-  width: '100%',
+  width: '300px'
 }))
 
-const Container = styled.div(() => ({
+const Container = styled.div(({ theme }) => ({
+  background: theme.bg,
+  marginRight: '10px',
+  padding: '0 10px',
+  verticalAlign: 'top',
   display: 'flex',
-  'input': {
-    flex: 1,
-  },
+  alignItems: 'center',
+  input: {
+    flex: 1
+  }
+}))
+
+const AddButton = styled(Button)(({ theme }) => ({
+  background: theme.bg,
+  boxShadow: theme.boxShadow
 }))

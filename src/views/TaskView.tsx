@@ -2,160 +2,116 @@ import * as React from 'react'
 import Markdown from 'react-markdown'
 import createTimeAgo from 'timeago.js'
 import { RouteComponentProps } from 'react-router'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 
 import Button from '../components/Button'
 import Checkbox from '../components/Checkbox'
 import CodeBlock from '../components/CodeBlock'
-import ScrollArea from '../components/ScrollArea'
+import Textarea from '../components/Textarea'
 import styled from '../styles/styled-components'
-import { taskStore } from '../stores'
+import { default as TaskStore } from '../stores/TaskStore'
 
-// import Icon from '../components/Icon'
 const timeAgo = createTimeAgo()
 
-export interface IProps extends RouteComponentProps<{ boardId: string, taskId: string }> { }
+export interface Props extends RouteComponentProps<{ boardId: string; taskId: string }> {}
 
-export interface IState {
-  editable: boolean
-  content: string | null
-}
+export default observer(function TaskView (props: Props) {
+  const taskStore = React.useContext(TaskStore)
+  const { selectedTask: task } = taskStore
 
-@observer
-export default class TaskView extends React.Component<IProps, IState> {
+  const [editable, setEditable] = React.useState(false)
+  const [content, setContent] = React.useState('')
 
-  public state: IState = {
-    editable: false,
-    content: '',
-  }
+  const taskId = Number(props.match.params.taskId)
 
-  private wrapper: React.RefObject<HTMLDivElement> = React.createRef()
-
-  public componentDidMount () {
-    const boardId = this.props.match.params.boardId
-    const taskId = Number(this.props.match.params.taskId)
-
+  React.useEffect(() => {
     taskStore.selectTask(taskId)
-
-    if (!taskStore.selectedTask) {
-      this.props.history.push('/boards/' + boardId)
+    if (taskStore.selectedTask) {
+      setContent(taskStore.selectedTask!.content)
     }
+  }, [taskId])
 
-    const { selectedTask: task } = taskStore
-
-    this.setState({ content: task!.content })
-  }
-
-  public componentDidUpdate (prevProps: IProps, prevState: IState) {
-    const boardId = this.props.match.params.boardId
-    const taskId = Number(this.props.match.params.taskId)
-    const prevTaskId = Number(prevProps.match.params.taskId)
-
-    if (taskId !== prevTaskId) {
-      taskStore.selectTask(taskId)
-
-      if (!taskStore.selectedTask) {
-        this.props.history.push(`/boards/${boardId}`)
-      }
-    }
-  }
-
-  public componentWillUnmount () {
+  const onClose = React.useCallback(() => {
     taskStore.selectTask(null)
-  }
+    props.history.push(`/boards/${props.match.params.boardId}`)
+  }, [])
 
-  public onClose = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.currentTarget !== this.wrapper.current) return
+  const onCheckboxChange = React.useCallback(
+    (finished: boolean) => {
+      taskStore.updateTask(task!.id, { finished })
+    },
+    [taskId]
+  )
 
-    const boardId = this.props.match.params.boardId
-    this.props.history.push(`/boards/${boardId}`)
-  }
+  const onContentChange = React.useCallback(
+    (newContent: string) => {
+      setContent(newContent)
+    },
+    [content]
+  )
 
-  private onSave = async () => {
-    const taskId = Number(this.props.match.params.taskId)
-    const { content } = this.state
+  const onEditable = React.useCallback(() => {
+    setEditable(true)
+  }, [editable])
 
-    if (!content) return
+  const onTaskSave = React.useCallback(async () => {
+    if (!content || content === taskStore.selectedTask!.content) {
+      setEditable(false)
+      return
+    }
 
-    await taskStore.updateTask(taskId, { content })
+    await taskStore.updateTask(task!.id, { content })
+    setEditable(false)
+  }, [editable, content])
 
-    this.setState({ editable: false })
-  }
+  const onRemoveTask = React.useCallback(async () => {
+    await taskStore.removeTask(taskId)
+    taskStore.selectedId = null
+    props.history.push(`/boards/${props.match.params.boardId}`)
+  }, [])
 
-  private setEdit = () => {
-    this.setState({ editable: true })
-  }
+  if (!task) return null
 
-  private onContentChange = (e: React.ChangeEvent<any>) => {
-    this.setState({ content: e.currentTarget.value })
-  }
-
-  private onCheckboxChange = async (finished: boolean) => {
-    const taskId = Number(this.props.match.params.taskId)
-
-    await taskStore.updateTask(taskId, { finished })
-  }
-
-  public renderEditArea = ({ content }: {content: string}) => {
-    return (
-      <React.Fragment>
-        <EditArea
-          onChange={this.onContentChange}
-          defaultValue={content}
-        />
-        <SaveButton onClick={this.onSave}>save</SaveButton>
-      </React.Fragment>
-    )
-  }
-
-  public render () {
-    const { editable, } = this.state
-    const { selectedTask: task } = taskStore
-
-    const EditAreaComponent = this.renderEditArea
-
-    if (!task) return null
-
-    return (
-      <Wrapper>
-        <ScrollArea>
-          <Mask onClick={this.onClose} ref={this.wrapper} />
-          <Container editable={editable}>
-            <Header>
-              <Title>
-                <Checkbox checked={task.finished} onChange={this.onCheckboxChange} />
-                <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
-              </Title>
-            </Header>
-            <Content>
-              {editable ? <EditAreaComponent content={task.content} /> : (
-                <React.Fragment>
-                  <Markdown
-                    source={task.content}
-                    className='markdown-body'
-                    allowNode={() => true}
-                    escapeHtml={false}
-                    skipHtml={false}
-                    renderers={{ code: CodeBlock }}
-                  />
-                  <EditButton onClick={this.setEdit}>edit</EditButton>
-                </React.Fragment>
-              )}
-            </Content>
-            <Footer>
-              {/* <DueTime overdue>
-              <DueTimeIcon size='small' name='Clock' />
-              <DueTimeDetail>
-                {timeAgo.format(task.DueAt)}
-              </DueTimeDetail>
-            </DueTime> */}
-            </Footer>
-          </Container>
-        </ScrollArea>
-      </Wrapper>
-    )
-  }
-}
+  return (
+    <Wrapper>
+      <Container editable={editable}>
+        <Header>
+          <Title>
+            <Checkbox checked={task.finished} onChange={onCheckboxChange} />
+            <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
+          </Title>
+          {editable && <Button size='small' icon='Save' onClick={onTaskSave} />}
+          {!editable && (
+            <Button size='small' icon='Edit' onClick={onEditable} />
+          )}
+          <Button size='small' icon='X' onClick={onClose} />
+        </Header>
+        <Content>
+          {editable && <EditArea onChange={onContentChange} value={content} />}
+          {!editable && (
+            <Markdown
+              source={task.content}
+              className='markdown-body'
+              allowNode={() => true}
+              escapeHtml={false}
+              skipHtml={false}
+              renderers={{ code: CodeBlock }}
+            />
+          )}
+        </Content>
+        <Footer>
+          <Button size='small' icon='Trash2' onClick={onRemoveTask} />
+          {/* <DueTime overdue>
+            <DueTimeIcon size='small' name='Clock' />
+            <DueTimeDetail>
+              {timeAgo.format(task.DueAt)}
+            </DueTimeDetail>
+          </DueTime> */}
+        </Footer>
+      </Container>
+    </Wrapper>
+  )
+})
 
 const Wrapper = styled.div(() => ({
   position: 'fixed',
@@ -168,40 +124,21 @@ const Wrapper = styled.div(() => ({
   height: '100%',
   background: 'rgba(238, 236, 232, .8)',
   overflowY: 'auto',
-}))
-
-const Mask = styled.div(() => ({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-  transition: 'all .3s',
-}))
-
-const SaveButton = styled(Button)(() => ({
-  position: 'absolute',
-  bottom: '50px',
-  right: '20px',
-  zIndex: 20,
-}))
-
-const EditButton = styled(Button)(() => ({
-  position: 'absolute',
-  bottom: '20px',
-  right: '10px',
-  zIndex: 20,
-}))
-
-const Container = styled.div<{ editable: boolean }>(({ editable }) => ({
-  margin: '40px 100px',
-  padding: '10px',
-  background: '#fff',
-  minHeight: '520px',
-  position: 'relative',
   display: 'flex',
+  justifyContent: 'center'
+}))
+
+const Container = styled.div<{ editable: boolean }>(({ theme }) => ({
+  background: theme.colors.white,
+  width: '800px',
+  padding: '10px',
+  margin: '40px 20px',
   flexDirection: 'column',
-  height: !editable ? 'auto' : 'calc(100% - 80px)',
+  display: 'flex',
+  '@media (max-width: 600px)': {
+    width: '100%',
+    margin: '40px 0'
+  }
 }))
 
 const Content = styled.div(() => ({
@@ -209,40 +146,38 @@ const Content = styled.div(() => ({
   height: '100%',
   '& .markdown-body': {
     minHeight: '440px',
-    marginRight: '10px',
-  },
+    marginRight: '10px'
+  }
 }))
 
-const EditArea = styled.textarea(({ theme }) => ({
-  width: '100%',
+const EditArea = styled(Textarea)(({ theme }) => ({
+  border: `${theme.border}`,
   height: '100%',
   lineHeight: '1.5em',
-  minHeight: '440px',
-  border: `${theme.border}`,
-  resize: 'none',
+  resize: 'none'
 }))
 
 const Header = styled.div(() => ({
   marginBottom: '8px',
-  display: 'flex',
+  display: 'flex'
 }))
 
 const DateInfo = styled.span(({ theme }) => ({
   fontSize: '12px',
   color: theme.fgLight,
   verticalAlign: 'text-bottom',
-  userSelect: 'none',
+  userSelect: 'none'
 }))
 
 const Title = styled.div(() => ({
   flex: 1,
-  alignItems: 'middle',
+  alignItems: 'middle'
 }))
 
 const Footer = styled.div(() => ({
   position: 'relative',
   bottom: '10px',
-  paddingTop: '20px',
+  paddingTop: '20px'
 }))
 
 // const DueTime = styled.span<{ overdue: boolean }>(({ theme, overdue }) => ({

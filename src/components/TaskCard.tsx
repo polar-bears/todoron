@@ -2,6 +2,7 @@ import * as React from 'react'
 import createTimeAgo from 'timeago.js'
 import ReactMarkdown, { MarkdownAbstractSyntaxTree } from 'react-markdown'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 import Card from './Card'
 import Checkbox from './Checkbox'
@@ -12,103 +13,107 @@ import { ITag, ITask } from '../models'
 
 const timeAgo = createTimeAgo()
 
-export interface ITaskCardContext {
+export interface ContextProps {
   tags: ITag[]
 }
 
-export interface ITaskCardProps {
+export interface Props {
   task: ITask
   index: number
   onClick?: (task: ITask) => void
   onFinishedChange?: (task: ITask) => void
 }
 
-export interface ITaskCardState { }
+function OriginalTaskCard (props: Props & ContextProps) {
+  const { tags, task, onClick = noop, onFinishedChange = noop } = props
 
-class OriginalTaskCard extends React.Component<ITaskCardProps & ITaskCardContext, ITaskCardState> {
+  const newTags = tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
 
-  private get tags () {
-    const { tags, task } = this.props
+  const taskId = 'task' + task.id
 
-    return tags.filter((tag) => ~task.tagIds.indexOf(tag.id))
-  }
+  const onCheckboxChange = React.useCallback(() => {
+    onFinishedChange(task)
+  }, [task])
 
-  private onClick = () => {
-    const { task, onClick, } = this.props
+  const onCardClick = React.useCallback(() => {
+    onClick(task)
+  }, [task])
 
-    if (onClick) onClick(task)
-  }
-
-  private onFinishedChange = (checked: boolean) => {
-    const { task, onFinishedChange, } = this.props
-    if (onFinishedChange) onFinishedChange(task)
-  }
-
-  public render () {
-    const { task } = this.props
-
-    const { id } = task
-    const taskId = 'task' + id
-
-    return (
-      <Wrapper key={taskId}>
-        <Card data-id={id}>
-          <Header>
-            <Title>
-              <Checkbox checked={task.finished} onChange={this.onFinishedChange} />
-              <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
-            </Title>
-            {this.tags.map((tag) => (
-              <Tag key={tag.id} color={tag.color}>{tag.title}</Tag>
-            ))}
-          </Header>
-          <Container onClick={this.onClick}>
-            <ReactMarkdown
-              source={task && task.content || ''}
-              className='markdown-body'
-              allowNode={(node: MarkdownAbstractSyntaxTree) => true}
-              escapeHtml={false}
-              skipHtml={false}
-              renderers={{ code: CodeBlock }}
+  return (
+    <Wrapper key={taskId} finished={task.finished}>
+      <Card>
+        <Header>
+          <Title>
+            <Checkbox
+              checked={task.finished}
+              onChange={onCheckboxChange}
             />
-          </Container>
-          <Footer>
-            {/* <DueTime overdue>
+            <DateInfo>Created at {timeAgo.format(task.createdAt)}</DateInfo>
+          </Title>
+          {newTags.map((tag) => (
+            <Tag key={tag.id} color={tag.color}>
+              {tag.title}
+            </Tag>
+          ))}
+        </Header>
+        <Container onClick={onCardClick}>
+          <ReactMarkdown
+            source={(task && task.content) || ''}
+            className='markdown-body'
+            allowNode={(node: MarkdownAbstractSyntaxTree) => true}
+            escapeHtml={false}
+            skipHtml={false}
+            renderers={{ code: CodeBlock }}
+          />
+        </Container>
+        <Footer>
+          {/* <DueTime overdue>
                   <DueTimeIcon size='small' name='Clock'/>
                   <DueTimeDetail>
                     Today at 10:00 am
                   </DueTimeDetail>
                 </DueTime> */}
-          </Footer>
-        </Card>
-      </Wrapper>
-    )
-  }
-
+        </Footer>
+      </Card>
+    </Wrapper>
+  )
 }
 
-export default function TaskCard (props: ITaskCardProps) {
+export default function TaskCard (props: Props) {
   return (
     <TagContext.Consumer>
-      {(context) => (
-        <OriginalTaskCard {...context} {...props} />
-      )}
+      {(context) => <OriginalTaskCard {...context} {...props} />}
     </TagContext.Consumer>
   )
 }
 
-const Wrapper = styled.div(() => ({
-  margin: '0 0 10px',
+const Wrapper = styled.div<{ finished: boolean }>(({ finished }) => ({
+  margin: '0 10px 0 10px',
+  paddingBottom: '10px',
+  opacity: finished ? 0.5 : 1,
+  transition: 'opacity .3s'
 }))
 
 const Header = styled.div(() => ({
-  marginBottom: '8px',
-  display: 'flex',
+  padding: '8px',
+  display: 'flex'
+}))
+
+const Container = styled.div(() => ({
+  padding: '0 8px 8px 8px',
+  fontSize: '13px',
+  overflow: 'hidden',
+  maxHeight: '200px'
+}))
+
+const Footer = styled.div(() => ({
+  marginTop: '8px'
 }))
 
 const Title = styled.div(() => ({
   flex: 1,
-  alignItems: 'middle',
+  display: 'flex',
+  alignItems: 'middle'
 }))
 
 const DateInfo = styled.span(({ theme }) => ({
@@ -116,16 +121,7 @@ const DateInfo = styled.span(({ theme }) => ({
   color: theme.fgLight,
   verticalAlign: 'text-bottom',
   userSelect: 'none',
-}))
-
-const Container = styled.div(() => ({
-  fontSize: '13px',
-  overflow: 'hidden',
-  maxHeight: '400px',
-}))
-
-const Footer = styled.div(() => ({
-  marginTop: '8px',
+  flex: 1
 }))
 
 // const DueTime = styled.span<{overdue: boolean}>(({ theme, overdue }) => ({

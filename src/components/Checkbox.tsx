@@ -1,46 +1,45 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 
-export interface ICheckboxProps {
+export interface Props {
   className?: string
   checked?: boolean
-  onChange?: (checked: boolean) => void
+  children?: React.ReactNode
+  onChange?: (checked: boolean, e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
-export interface ICheckboxState {}
+export default function Checkbox (props: Props) {
+  const { className, children, checked = false, onChange = noop } = props
 
-export default class Checkbox extends React.Component<ICheckboxProps, ICheckboxState> {
+  const onCheckbox = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
+    if (e.defaultPrevented) return
 
-  public onChange = () => {
-    const { checked = false, onChange } = this.props
+    onChange(!checked, e)
+  }, [checked])
 
-    if (onChange) {
-      onChange(!checked)
-    }
-  }
-
-  public render () {
-    const { className, children, checked = false } = this.props
-
-    return (
-      <Wrapper className={className}>
-        <OriginalCheckbox checked={checked} type='checkbox' onChange={this.onChange}/>
-        <Content>{children}</Content>
-      </Wrapper>
-    )
-  }
-
+  return (
+    <Wrapper className={className}>
+      <OriginalCheckbox
+        type='checkbox'
+        checked={checked}
+        onChange={onCheckbox}
+      />
+      <Content>{children}</Content>
+    </Wrapper>
+  )
 }
 
-const Wrapper = styled.label(({ theme }) => ({
+const Wrapper = styled.label(() => ({
   verticalAlign: 'middle',
   userSelect: 'none',
-  cursor: 'pointer',
+  cursor: 'pointer'
 }))
 
 const OriginalCheckbox = styled.input(() => ({
-  display: 'none',
+  display: 'none'
 }))
 
 const Content = styled.span(({ theme }) => ({
@@ -53,7 +52,7 @@ const Content = styled.span(({ theme }) => ({
     content: '""',
     verticalAlign: 'text-bottom',
     border: theme.borderDark,
-    borderRadius: theme.borderRadius,
+    borderRadius: theme.borderRadius
   },
   '&::after': {
     position: 'absolute',
@@ -66,11 +65,11 @@ const Content = styled.span(({ theme }) => ({
     borderBottom: theme.borderDark,
     borderWidth: '2px',
     opacity: 0,
-    transform: 'rotate(-45deg)',
+    transform: 'rotate(-45deg)'
   },
   'input:checked + &': {
     '&::after': {
-      opacity: 1,
-    },
-  },
+      opacity: 1
+    }
+  }
 }))

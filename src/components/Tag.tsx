@@ -2,47 +2,41 @@ import * as React from 'react'
 
 import styled from '../styles/styled-components'
 import Icon from './Icon'
+import noop from './../libs/noop'
 
-export interface ITagProps {
+export interface Props {
   className?: string
   color: string
   checked?: boolean
+  children?: React.ReactNode
   onChange?: (checked: boolean) => void
 }
 
-export interface ITagState {}
+export default function Tag (props: Props) {
+  const { checked = true, className, color, children, onChange = noop } = props
 
-export default class Tag extends React.Component<ITagProps, ITagState> {
+  const onTagClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
 
-  public onClick = () => {
-    const { checked, onChange } = this.props
-
-    if (checked !== undefined && onChange) {
-      onChange(!checked)
-    }
+    onChange(!checked)
   }
 
-  public render () {
-    const { className, color, checked, children } = this.props
-
-    return (
-      <Wrapper
-        className={className}
-        color={color}
-        checkable={checked !== undefined}
-        onClick={this.onClick}
-      >
-        {checked === true && <StyledIcon name='Check'/>}
-        {children}
-      </Wrapper>
-    )
-  }
-
+  return (
+    <Wrapper
+      className={className}
+      color={color}
+      checkable={checked}
+      onClick={onTagClick}
+    >
+      {checked === true && <StyledIcon name='Check' />}
+      {children}
+    </Wrapper>
+  )
 }
 
 const Wrapper = styled.div<{
-  checkable: boolean,
-  color: string,
+  checkable: boolean
+  color: string
 }>(({ checkable, color, theme }) => ({
   display: 'inline-block',
   paddingRight: '4px',
@@ -58,9 +52,9 @@ const Wrapper = styled.div<{
   verticalAlign: 'middle',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  userSelect: 'none',
+  userSelect: 'none'
 }))
 
 const StyledIcon = styled(Icon)(() => ({
-  color: 'white',
+  color: 'white'
 }))

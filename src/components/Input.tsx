@@ -1,10 +1,11 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 
 export type InputSize = 'small' | 'medium' | 'large'
 
-export interface IInputProps {
+export interface Props {
   className?: string
   value?: string
   size?: InputSize
@@ -18,89 +19,86 @@ export interface IInputProps {
   onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-export interface IInputState {}
+export default function Input (props: Props) {
+  const {
+    className,
+    placeholder,
+    value,
+    full = true,
+    disabled = false,
+    autoFocus = false,
+    size = 'medium',
+    onChange = noop,
+    onBlur = noop,
+    onKeyUp = noop,
+    onEnter = noop
+  } = props
 
-export default class Input extends React.Component<IInputProps, IInputState> {
+  const refInput: React.RefObject<HTMLInputElement> = React.useRef(null)
 
-  private refInput = React.createRef<HTMLInputElement>()
-
-  public componentDidMount () {
-    if (this.props.autoFocus) {
-      this.focus()
+  React.useEffect(() => {
+    if (autoFocus && refInput.current) {
+      refInput.current.focus()
     }
+  }, [autoFocus])
+
+  const onInputValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value, e)
   }
 
-  public focus () {
-    const $input = this.refInput.current
-
-    if ($input) {
-      $input.focus()
-    }
+  const onInputBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onBlur(e.target.value, e)
   }
 
-  private onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { disabled, onChange } = this.props
-
-    if (!disabled && onChange) {
-      onChange(e.target.value, e)
-    }
-  }
-
-  private onBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { disabled, onBlur } = this.props
-
-    if (!disabled && onBlur) {
-      onBlur(e.target.value, e)
-    }
-  }
-
-  private onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const { disabled, onKeyUp, onEnter } = this.props
-
-    if (disabled) {
-      return
-    }
-
-    if (onKeyUp) {
+  const onInputKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.keyCode === 13) {
+      onEnter(e)
+    } else {
       onKeyUp(e)
     }
-
-    if (onEnter && e.keyCode === 13 ) {
-      onEnter(e)
-    }
   }
 
-  public render () {
-    const { className, value, placeholder, disabled = false, full = false, size = 'medium' } = this.props
-
-    return (
-      <OriginalInput
-        className={className}
-        ref={this.refInput}
-        full={full}
-        cSize={size}
-        value={value}
-        placeholder={placeholder}
-        disabled={disabled}
-        onChange={this.onChange}
-        onKeyDown={this.onKeyDown}
-        onBlur={this.onBlur}
-      />
-    )
-  }
-
+  return (
+    <OriginalInput
+      className={className}
+      ref={refInput}
+      full={full}
+      cSize={size}
+      value={value}
+      placeholder={placeholder}
+      disabled={disabled}
+      onChange={onInputValueChange}
+      onBlur={onInputBlur}
+      onKeyUp={onInputKeyUp}
+    />
+  )
 }
 
 const sizes = {
-  small: { padding: '0 6px', fontSize: '12px', height: '26px', minWidth: '26px' },
-  medium: { padding: '0 10px', fontSize: '14px', height: '36px', minWidth: '36px' },
-  large: { padding: '0 10px', fontSize: '16px', height: '42px', minWidth: '42px' },
+  small: {
+    padding: '0 6px',
+    fontSize: '12px',
+    height: '26px',
+    minWidth: '26px'
+  },
+  medium: {
+    padding: '0 10px',
+    fontSize: '14px',
+    height: '36px',
+    minWidth: '36px'
+  },
+  large: {
+    padding: '0 10px',
+    fontSize: '16px',
+    height: '42px',
+    minWidth: '42px'
+  }
 }
 
 const OriginalInput = styled.input<{
-  full: boolean,
-  disabled: boolean,
-  cSize: InputSize,
+  full: boolean
+  disabled: boolean
+  cSize: InputSize
 }>(({ theme, full, cSize, disabled }) => ({
   ...sizes[cSize],
   width: full ? '100%' : 'auto',
@@ -111,6 +109,6 @@ const OriginalInput = styled.input<{
   borderRadius: theme.borderRadius,
   transition: 'background 0.3s',
   '&:focus': {
-    background: theme.bg,
-  },
+    background: theme.bg
+  }
 }))

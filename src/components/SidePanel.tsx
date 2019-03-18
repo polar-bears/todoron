@@ -1,38 +1,28 @@
 import * as React from 'react'
 
 import styled from '../styles/styled-components'
-import ScrollArea from './ScrollArea'
 
-export interface ISidePanelProps {
+export interface Props {
   className?: string
   header?: React.ReactNode
   headerExtra?: React.ReactNode
   expanded?: boolean
+  children?: React.ReactNode
 }
 
-export interface ISidePanelState {}
+export default function SidePanel (props: Props) {
+  const { className, header, headerExtra, expanded = false, children } = props
 
-export default class SidePanel extends React.Component<ISidePanelProps, ISidePanelState> {
-
-  public render () {
-    const { className, header, headerExtra, children, expanded = false } = this.props
-
-    return (
-      <Wrapper className={className} expanded={expanded}>
-        {header && <Header>{header}</Header>}
-        {headerExtra && <HeaderExtra>{headerExtra}</HeaderExtra>}
-        <StyledScrollArea>
-          <Container>
-              {children}
-          </Container>
-        </StyledScrollArea>
-      </Wrapper>
-    )
-  }
-
+  return (
+    <Wrapper className={className} expanded={expanded}>
+      {header && <Header>{header}</Header>}
+      {headerExtra && <HeaderExtra>{headerExtra}</HeaderExtra>}
+      <Container>{children}</Container>
+    </Wrapper>
+  )
 }
 
-const Wrapper = styled.div<{expanded: boolean}>(({ theme, expanded }) => ({
+const Wrapper = styled.div<{ expanded: boolean }>(({ theme, expanded }) => ({
   display: 'flex',
   flexDirection: 'column',
   position: 'absolute',
@@ -44,7 +34,7 @@ const Wrapper = styled.div<{expanded: boolean}>(({ theme, expanded }) => ({
   background: theme.bgLighter,
   boxShadow: theme.boxShadow,
   transform: expanded ? 'translateX(0)' : 'translateX(-300px)',
-  transition: 'transform 0.3s ease',
+  transition: 'transform 0.3s ease'
 }))
 
 const Header = styled.div(({ theme }) => ({
@@ -52,15 +42,13 @@ const Header = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   height: '60px',
-  borderBottom: theme.border,
+  borderBottom: theme.border
 }))
 
 const HeaderExtra = styled.div({})
 
-const StyledScrollArea = styled(ScrollArea)(() => ({
-  flex: 1,
-}))
-
 const Container = styled.div(() => ({
   padding: '15px',
+  overflow: 'auto',
+  flex: 1
 }))

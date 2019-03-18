@@ -2,36 +2,30 @@ import 'github-markdown-css'
 import 'highlight.js/styles/solarized-light.css'
 
 import * as React from 'react'
-import { HashRouter as Router, Route } from 'react-router-dom'
+import { ThemeProvider } from 'styled-components'
+import { createHashHistory } from 'history'
+import { Route, Router } from 'react-router'
 
-import GlobalStyle from './styles/globalStyles'
-import ResetStyle from './styles/reset'
-import HomeView from './views/HomeView'
-import { ThemeProvider } from './styles/styled-components'
+import MainView from './views/MainView'
+import { GlobalStyles } from './styles/reset'
 import { lightTheme } from './styles/theme'
 
-export interface IAppProps { }
-export interface IAppState {
-  theme: object
-}
+const history = createHashHistory()
+const renderApp = (routeProps: any) => <MainView {...routeProps}/>
 
-export default class App extends React.Component<IAppProps, IAppState> {
+export interface Props {}
 
-  public state = {
-    theme: lightTheme,
-  }
+export default function App (props: Props) {
+  const [theme] = React.useState(lightTheme)
 
-  public render () {
-    return (
-      <ThemeProvider theme={lightTheme}>
+  return (
+    <ThemeProvider theme={theme}>
+      <Router history={history}>
         <React.Fragment>
-          <ResetStyle />
-          <GlobalStyle />
-          <Router>
-            <Route path='/' component={HomeView}/>
-          </Router>
+          <Route component={renderApp} />
+          <GlobalStyles />
         </React.Fragment>
-      </ThemeProvider>
-    )
-  }
+      </Router>
+    </ThemeProvider>
+  )
 }

@@ -1,20 +1,22 @@
+import * as React from 'react'
 import { action, computed, observable } from 'mobx'
 
 import db from '../db'
 import { IBoard, IBoardAttributes } from '../models'
 import { addOne, removeById, renew } from './adapter'
 
-export default class BoardStore {
-
+export class BoardStore {
   @observable public boards: IBoard[] = []
 
   @observable public selectedId: number | null = null
 
   @computed
   public get selectedBoard () {
-    return this.selectedId
-      ? this.boards.find((board) => board.id === this.selectedId) || null
-      : null
+    if (!this.selectedId && this.boards.length > 0) {
+      return this.boards[0]
+    }
+
+    return this.boards.find((board) => board.id === this.selectedId)
   }
 
   @action
@@ -26,12 +28,13 @@ export default class BoardStore {
   public async addBoard (title: string) {
     const board = await db.addBoard(title)
     this.boards = addOne(this.boards, board, true)
+    this.selectBoard(board.id)
   }
 
   @action
   public async updateBoard (
     boardId: number,
-    boardAttrs: Partial<IBoardAttributes>,
+    boardAttrs: Partial<IBoardAttributes>
   ) {
     const board = await db.updateBoard(boardId, boardAttrs)
     this.boards = renew(this.boards, board)
@@ -40,6 +43,7 @@ export default class BoardStore {
   @action
   public async removeBoard (boardId: number) {
     await db.removeBoard(boardId)
+
     this.boards = removeById(this.boards, boardId)
   }
 
@@ -47,5 +51,6 @@ export default class BoardStore {
   public async selectBoard (boardId: number | null) {
     this.selectedId = boardId
   }
-
 }
+
+export default React.createContext(new BoardStore())

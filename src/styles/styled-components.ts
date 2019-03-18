@@ -8,7 +8,7 @@ const {
   css,
   createGlobalStyle,
   keyframes,
-  ThemeProvider,
+  ThemeProvider
 } = styledComponents as ThemedStyledComponentsModule<typeof lightTheme>
 
 export { css, createGlobalStyle, keyframes, ThemeProvider }

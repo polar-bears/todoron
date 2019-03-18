@@ -1,39 +1,27 @@
-import * as React from 'react'
 import * as hljs from 'highlight.js'
+import React, { useEffect, useRef } from 'react'
 
-interface IProps {
+interface Props {
   value: string
   language: string
 }
 
-interface IState { }
+export default function CodeBlock (props: Props) {
+  const { language, value } = props
 
-export default class CodeBlock extends React.Component<IProps, IState> {
+  const refCode: React.RefObject<HTMLElement> = useRef(null)
 
-  private refCode = React.createRef<HTMLElement>()
+  useEffect(() => {
+    if (refCode.current) {
+      hljs.highlightBlock(refCode.current)
+    }
+  })
 
-  public componentDidMount () {
-    const el = this.refCode.current!
-    hljs.highlightBlock(el)
-  }
-
-  public componentDidUpdate () {
-    const el = this.refCode.current!
-    hljs.highlightBlock(el)
-  }
-
-  public render () {
-    const { language, value } = this.props
-
-    return (
-      <pre>
-        <code
-          ref={this.refCode}
-          className={`language-${language}`}
-        >
-          {value}
-        </code>
-      </pre>
-    )
-  }
+  return (
+    <pre>
+      <code ref={refCode} className={`language-${language}`}>
+        {value}
+      </code>
+    </pre>
+  )
 }

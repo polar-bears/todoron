@@ -1,8 +1,9 @@
 import * as React from 'react'
 
+import noop from '../libs/noop'
 import styled from '../styles/styled-components'
 
-export interface ITextAreaProps {
+export interface Props {
   className?: string
   value?: string
   disabled?: boolean
@@ -11,78 +12,70 @@ export interface ITextAreaProps {
   limit?: number
   rows?: number
   onChange?: (value: string, e: React.ChangeEvent<HTMLTextAreaElement>) => void
-  onKeyUp?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onKeyUp?: (value: string, e: React.KeyboardEvent<HTMLTextAreaElement>) => void
 }
 
-export interface ITextAreaState {}
+export default function TextArea (props: Props) {
+  const {
+    className,
+    placeholder,
+    limit,
+    value,
+    rows,
+    disabled = false,
+    autoFocus = false,
+    onChange = noop,
+    onKeyUp = noop
+  } = props
 
-export default class TextArea extends React.Component<ITextAreaProps, ITextAreaState> {
+  const refTextArea: React.RefObject<HTMLTextAreaElement> = React.useRef(null)
 
-  private refTextArea = React.createRef<HTMLTextAreaElement>()
-
-  public componentDidMount () {
-    if (this.props.autoFocus) {
-      this.focus()
+  React.useEffect(() => {
+    if (autoFocus && refTextArea.current) {
+      refTextArea.current.focus()
     }
-  }
+  }, [autoFocus])
 
-  public focus () {
-    const $textarea = this.refTextArea.current
+  const onValueChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    let newVal = e.target.value
 
-    if ($textarea) {
-      $textarea.focus()
-    }
-  }
+    if (limit && !isNaN(limit)) newVal = newVal.substring(0, limit)
 
-  private onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { disabled, limit, onChange } = this.props
-    const value = e.target.value
+    onChange(newVal, e)
+  }, [])
 
-    if (!disabled && onChange && (limit === undefined || value.length <= limit)) {
-      onChange(value, e)
-    }
-  }
+  const onTextareaKeyUp = React.useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    onKeyUp(e.currentTarget.value, e)
+  }, [])
 
-  private onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const { disabled, onKeyUp } = this.props
-
-    if (disabled) {
-      return
-    }
-
-    if (onKeyUp) {
-      onKeyUp(e)
-    }
-  }
-
-  public render () {
-    const { className, value = '', placeholder, limit, rows, disabled = false } = this.props
-
-    return (
-      <Wrapper>
-        <OriginalTextArea
-          className={className}
-          ref={this.refTextArea}
-          rows={rows}
-          value={value}
-          placeholder={placeholder}
-          disabled={disabled}
-          onChange={this.onChange}
-          onKeyDown={this.onKeyDown}
-        />
-        {limit !== undefined && <Count>{value.length} / {limit}</Count>}
-      </Wrapper>
-    )
-  }
-
+  return (
+    <Wrapper>
+      <OriginalTextArea
+        className={className}
+        ref={refTextArea}
+        rows={rows}
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled}
+        onChange={onValueChange}
+        onKeyUp={onTextareaKeyUp}
+      />
+      {limit !== undefined && (
+        <Count>
+          {value!.length || 0} / {limit}
+        </Count>
+      )}
+    </Wrapper>
+  )
 }
 
 const Wrapper = styled.div(() => ({
   position: 'relative',
+  height: '100%'
 }))
 
 const OriginalTextArea = styled.textarea<{
-  disabled: boolean,
+  disabled: boolean
 }>(({ theme, disabled }) => ({
   padding: '8px',
   display: 'block',
@@ -95,14 +88,14 @@ const OriginalTextArea = styled.textarea<{
   resize: 'none',
   transition: 'background 0.3s',
   '&:focus': {
-    background: theme.bg,
-  },
+    background: theme.bg
+  }
 }))
 
 const Count = styled.div(({ theme }) => ({
   position: 'absolute',
   bottom: '5px',
-  right: '5px',
+  right: '8px',
   fontSize: '12px',
-  color: theme.fgLight,
+  color: theme.fgLight
 }))
